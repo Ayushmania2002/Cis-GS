@@ -18,6 +18,7 @@ All scripts are modular, reproducible, and organised to directly reflect the *Ma
 ## Repository Structure
 
 The repository is organised as a multi-stage analysis pipeline, with each directory corresponding to a defined analytical step.
+For a more detailed step-by-step code execution order please check src/README.md 
 
 
 ### `src/` – Core analysis pipeline
