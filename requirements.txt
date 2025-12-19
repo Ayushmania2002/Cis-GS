@@ -1,1 +1,7 @@
+biopython
+pandas
+numpy
+matplotlib
+scipy
+networkx
 
