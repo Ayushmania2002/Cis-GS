@@ -16,17 +16,15 @@ Downstream analyses depend on outputs generated in earlier steps.
 
 ---
 
-## 01_genome_preprocessing/
+## 01_data_preprocessing/
 
 **Purpose:**  
 Prepare genome annotations and retrieve sequence data required for promoter
 analysis and cross-species comparisons.
 
 **Key scripts:**
-- `parse_gff.py` — parses genome annotation files
-- `extract_promoters.py` — extracts promoter sequences
-- `strand_normalization.py` — ensures strand-consistent coordinates
-- `fetch_ncbi_sequences.py` — retrieves transcript sequences from NCBI Entrez
+- `add_arahy_prefix.py` — 
+- `extract_cis_in_genes.py` — extracts cis element sequences in the 2 kb upstream promoter 
 
 **Outputs:**  
 Processed annotation files, promoter FASTA sequences, and transcript FASTA files.
