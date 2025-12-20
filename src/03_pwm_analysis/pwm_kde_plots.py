@@ -35,5 +35,5 @@ plt.savefig(
 )
 plt.close()
 
-print("✅ PWM KDE plot saved.")
+print("PWM KDE plot saved.")
 
