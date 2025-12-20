@@ -71,5 +71,5 @@ def make_pwm(gene, seqs, output_dir="results/pwm"):
 for gene, seqs in alignments.items():
     make_pwm(gene, seqs)
 
-print("✅ PWMs and logos generated.")
+print("PWMs and logos generated.")
 
