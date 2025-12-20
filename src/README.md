@@ -27,7 +27,9 @@ analysis and cross-species comparisons.
 - `extract_cis_in_genes.py` — extracts cis element sequences in the 2 kb upstream promoter 
 
 **Outputs:**  
-Processed annotation files, promoter FASTA sequences, and transcript FASTA files.
+- Prints results of matches with gene ID, cis-element ID,
+  and start/end positions.
+- Can be easily extended to save results as CSV for downstream analyses.
 
 ---
 
