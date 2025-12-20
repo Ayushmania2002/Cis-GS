@@ -64,5 +64,5 @@ df.to_csv(
     index=False
 )
 
-print("✅ PWM scoring completed.")
+print("PWM scoring completed.")
 
