@@ -23,7 +23,7 @@ Prepare genome annotations and retrieve sequence data required for promoter
 analysis and cross-species comparisons.
 
 **Key scripts:**
-- `add_arahy_prefix.py` — 
+- `add_arahy_prefix.py` — Add 'Arahy.' prefix to short gene IDs
 - `extract_cis_in_genes.py` — extracts cis element sequences in the 2 kb upstream promoter 
 
 **Outputs:**  
