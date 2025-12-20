@@ -100,6 +100,6 @@ Detect co-expression modules using graph-based community detection.
 
 ## Visualization (Performed Separately)
 
-Visualization scripts are located in: src/07_visualisation
+Visualization scripts are located in: `src/07_visualisation/`
 
 
