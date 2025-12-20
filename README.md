@@ -23,21 +23,13 @@ modules can be rerun independently if their required inputs are present.
 
 ---
 
-## 01_genome_preprocessing/
+## 01_data_preprocessing/
 
 ### Purpose
 Prepare genome annotations and retrieve sequence data required for promoter
 analysis, cis-element scanning, and cross-species comparisons.
 
-### Key scripts
-- `parse_gff.py`  
-  Parses genome annotation (GFF/GTF) files and standardises feature metadata.
-- `extract_promoters.py`  
-  Extracts upstream promoter sequences from annotated genomes.
-- `strand_normalization.py`  
-  Normalises gene coordinates to ensure strand-consistent promoter orientation.
-- `fetch_ncbi_sequences.py`  
-  Retrieves transcript and CDS sequences from NCBI using Entrez utilities.
+01_data_preprocessing
 
 ### Outputs
 - Processed genome annotation files  
