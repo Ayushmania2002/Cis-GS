@@ -189,3 +189,10 @@ and network analyses.
   archival (e.g., Zenodo DOI assignment).
 
 ---
+
+## License
+
+This project is licensed under the MIT License.  
+See the `LICENSE` file for details.
+
+---
