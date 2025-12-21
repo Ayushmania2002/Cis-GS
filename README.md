@@ -1,4 +1,4 @@
-#  (CYC-GS) Biopython-CYC-re-Genome-Scanning
+#  (CYC-GS) Biopython-CYC-re-Genome-Scanner
 
 # Source Code Structure and Execution Order
 
