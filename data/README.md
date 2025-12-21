@@ -1,57 +1,29 @@
-oftware Requirements
+## Software Requirements
 
-All analyses in this repository were performed using Python 3.10.
+All analyses in this repository were performed using **Python 3.10**.
 
-The required Python packages are listed in the requirements.txt file and include tools for bioinformatics analysis, data processing, visualization, and network analysis.
+The required Python packages and dependencies are listed in the `requirements.txt` file and include:
 
-Required Packages
+- numpy  
+- pandas  
+- scipy  
+- biopython  
+- bcbio-gff  
+- matplotlib  
+- seaborn  
+- matplotlib-venn  
+- networkx  
+- python-louvain (`community`)  
+- logomaker  
+- tqdm  
+- requests  
+- PyMuPDF (`fitz`)  
 
-Core scientific computing
+Standard Python libraries (`os`, `sys`, `re`, `math`, `csv`, `pathlib`, etc.) are used throughout the notebooks and do not require separate installation.
 
-numpy
+### Installation
 
-pandas
-
-scipy
-
-Bioinformatics
-
-biopython
-
-bcbio-gff
-
-Visualization
-
-matplotlib
-
-seaborn
-
-matplotlib-venn
-
-Network and graph analysis
-
-networkx
-
-python-louvain (community)
-
-Motif and sequence visualization
-
-logomaker
-
-Utilities
-
-tqdm
-
-requests
-
-PDF handling
-
-PyMuPDF (fitz)
-
-Standard Python libraries (e.g., os, sys, re, math, csv, pathlib) are used throughout the notebooks and do not require separate installation.
-
-Installation
+Clone the repository and install the required dependencies using:
 
 ```bash
 pip install -r requirements.txt
-
