@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this code, please cite the corresponding manuscript and this software repository."
-title: "cyc-re-genome-scan: Genome-wide cis-regulatory and coexpression analysis of CYCLOPS-associated genes"
+title: "CYC-re-Genome-Scanner: Genome-wide cis-regulatory and coexpression analysis of CYCLOPS-associated genes"
 authors:
   - family-names: Mallick
     given-names: Ayushman
