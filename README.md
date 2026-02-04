@@ -1,5 +1,5 @@
 #  (Cis-GS) Cis-element Genome Scanner
-# Biopython-CYC-re-Genome-Scanner
+# Biopython-based All-in-One Tool
 
 # Source Code Structure and Execution Order
 
