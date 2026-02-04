@@ -1,7 +1,7 @@
-<img src="logo.png" width="100%">
+<img src="banner.png" width="100%">
 
 # Cis-GS : Cis-element Genome Scanner
-# Biopython-based All-in-One Tool
+* Biopython-based All-in-One Tool
 # Source Code Structure and Execution Order
 
 This directory contains all source code used for genome-wide cis-regulatory
