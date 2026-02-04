@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="logo.png" width="200">
-</p>
+<img src="assets/logo.png" width="100%">
 
 # Cis-GS : Cis-element Genome Scanner
 # Biopython-based All-in-One Tool
