@@ -1,6 +1,6 @@
 #  (Cis-GS) Cis-element Genome Scanner
 <p align="center">
-  <img src="logo.png" width="600">
+  <img src="logo.png" width="400">
 </p>
 
 # Biopython-based All-in-One Tool
