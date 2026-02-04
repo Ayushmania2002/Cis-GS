@@ -2,8 +2,8 @@
 <p align="center">
   <img src="logo.png" width="600">
 </p>
-# Biopython-based All-in-One Tool
 
+# Biopython-based All-in-One Tool
 # Source Code Structure and Execution Order
 
 This directory contains all source code used for genome-wide cis-regulatory
