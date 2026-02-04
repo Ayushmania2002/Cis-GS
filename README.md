@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" width="300">
+  <img src="logo.png" width="200">
 </p>
 
 #  (Cis-GS) Cis-element Genome Scanner
