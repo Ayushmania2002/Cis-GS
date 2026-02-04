@@ -1,7 +1,7 @@
 #  (Cis-GS) Cis-element Genome Scanner
 # Biopython-based All-in-One Tool
 <p align="center">
-  <img src="assets/logo.png" width="200">
+  <img src="logo.png" width="200">
 </p>
 
 # Source Code Structure and Execution Order
