@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the corresponding manuscript and this software repository."
+title: "CYC-re-Genome-Scanner: Genome-wide cis-regulatory and coexpression analysis of CYCLOPS-associated genes"
+authors:
+  - family-names: Mallick
+    given-names: Ayushman
+    orcid: https://orcid.org/0009-0004-5774-450X
+repository-code: https://github.com/Ayushmania2002/CYC-re-Genome-Scanning
+url: https://github.com/Ayushmania2002/CYC-re-Genome-Scanning
+license: MIT
+keywords:
+  - cis-regulatory elements
+  - position weight matrix
+  - coexpression network
+  - CYCLOPS
+  - plant genomics
+  - transcriptomics
+  - systems biology
+abstract: >
+  This repository contains the complete computational pipeline used for
+  genome-wide cis-regulatory element discovery, PWM-based motif analysis,
+  transcriptomic filtering, and coexpression network construction to identify
+  genes associated with the CYCLOPS transcriptional regulator.
