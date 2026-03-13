@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Cis-GS"
+version = "1.0.0"
+description = "Cis-regulatory Element Genome Scanner — analyze cis-regulatory elements across genomes"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.8"
+authors = [
+    {name = "Ayushman Mallick"},
+    {name = "Plant Signaling Lab, IISER Tirupati"},
+]
+keywords = [
+    "bioinformatics", "genomics", "cis-regulatory", "promoter",
+    "motif", "transcription-factor", "TFBS", "gene-expression",
+    "co-expression", "WGCNA", "PlantTFDB", "JASPAR"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Environment :: X11 Applications :: Qt",
+]
+dependencies = [
+    "PyQt5>=5.15.0",
+    "numpy>=1.21.0",
+    "pandas>=1.3.0",
+    "matplotlib>=3.3.0",
+    "seaborn>=0.11.0",
+    "biopython>=1.79",
+    "scikit-learn>=1.0.0",
+    "scipy>=1.7.0",
+    "logomaker>=0.8",
+    "Pillow>=9.0.0",
+    "python-louvain>=0.15",
+    "networkx>=2.6",
+]
+
+[project.optional-dependencies]
+dev = ["pyinstaller>=5.0", "build", "twine"]
+
+[project.urls]
+Homepage = "https://github.com/Ayushmania2002/Cis-GS"
+Documentation = "https://Ayushmania2002.github.io/Cis-GS/"
+"Bug Tracker" = "https://github.com/Ayushmania2002/Cis-GS/issues"
+"Source Code" = "https://github.com/Ayushmania2002/Cis-GS"
+
+[project.scripts]
+cis-gs = "cis_gs.cli:main"
+
+[project.gui-scripts]
+cis-gs-gui = "cis_gs.app:main"
+
+[tool.setuptools.packages.find]
+include = ["cis_gs*"]
+
+[tool.setuptools.package-data]
+cis_gs = ["assets/*"]

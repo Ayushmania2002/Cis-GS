@@ -1,0 +1,31 @@
+# Build
+build/
+dist/
+*.egg-info/
+*.egg
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Workspace data (user-generated)
+workspace/
+
+# PyInstaller
+*.spec.bak
+
+# PyPI config (contains tokens)
+.pypirc
