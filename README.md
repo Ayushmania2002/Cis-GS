@@ -19,21 +19,57 @@ Download `Cis-GS.zip` from the [**GitHub Releases**](https://github.com/Ayushman
 
 > **Note:** Windows may show a SmartScreen warning on first launch. Click **"More info" → "Run anyway"** to proceed.
 
-### Option 2 — pip install (GUI + CLI)
+### Option 2 — Windows / Linux / macOS via pip (GUI + CLI)
+
+All platforms with Python 3.8+ installed:
 
 ```bash
 pip install Cis-GS
-```
-
-Launch the GUI:
-```bash
 cis-gs
 ```
 
-If `cis-gs` is not found (PATH not set), use:
+If `cis-gs` is not found after install (PATH not configured), use:
 ```bash
-python -m cis_gs
+python -m cis_gs        # Windows
+python3 -m cis_gs       # Linux / macOS
 ```
+
+#### macOS
+
+```bash
+# Install Python 3 if not already installed (via Homebrew)
+brew install python
+
+pip3 install Cis-GS
+cis-gs
+```
+
+> **macOS note:** If PyQt5 fails to install, try:
+> ```bash
+> pip3 install --upgrade pip
+> pip3 install PyQt5 Cis-GS
+> ```
+
+#### Linux (Ubuntu / Debian)
+
+```bash
+# Install system PyQt5 and pip if needed
+sudo apt update
+sudo apt install python3-pip python3-pyqt5
+
+pip3 install Cis-GS
+cis-gs
+```
+
+#### Linux (Fedora / RHEL / CentOS)
+
+```bash
+sudo dnf install python3-pip python3-qt5
+pip3 install Cis-GS
+cis-gs
+```
+
+> **Linux note:** If you see a display error (`cannot connect to X server`), make sure you are running a desktop session, not a headless SSH terminal. For headless servers, use the CLI only — the GUI requires a display.
 
 ### Option 3 — From Source
 

@@ -298,9 +298,11 @@
     <p>Choose how you want to use Cis-GS:</p>
 
     <div class="tab-bar">
-        <button class="tab-btn active" onclick="showTab('start','exe')">&#128190; Standalone .exe</button>
-        <button class="tab-btn" onclick="showTab('start','pip')">&#128229; pip install</button>
-        <button class="tab-btn" onclick="showTab('start','src')">&#128196; From Source</button>
+        <button class="tab-btn active" onclick="showTab('start','exe')">🪟 Windows .exe</button>
+        <button class="tab-btn" onclick="showTab('start','mac')">🍎 macOS</button>
+        <button class="tab-btn" onclick="showTab('start','linux')">🐧 Linux</button>
+        <button class="tab-btn" onclick="showTab('start','pip')">📦 pip (all platforms)</button>
+        <button class="tab-btn" onclick="showTab('start','src')">📄 From Source</button>
     </div>
 
     <div id="start-exe" class="tab-pane active">
@@ -311,34 +313,88 @@
                 Double-click to run — no installation, no Python, no dependencies needed.
             </p>
             <a href="https://github.com/Ayushmania2002/Cis-GS/releases/latest">
-                &#8659; Download Cis-GS.exe (latest release)
+                &#8659; Download Cis-GS-v1.0.0-Windows.zip (latest release)
             </a>
         </div>
         <ol>
             <li>Go to the <a href="https://github.com/Ayushmania2002/Cis-GS/releases/latest">GitHub Releases page</a></li>
-            <li>Download <code>Cis-GS.zip</code> (or <code>Cis-GS.exe</code>) under <em>Assets</em></li>
-            <li>If downloaded as a ZIP, extract it to any folder</li>
-            <li>Double-click <code>Cis-GS.exe</code> to launch the GUI</li>
+            <li>Under <em>Assets</em>, download <code>Cis-GS-v1.0.0-Windows.zip</code></li>
+            <li>Extract the ZIP to any folder on your PC</li>
+            <li>Double-click <code>Cis-GS.exe</code> to launch</li>
         </ol>
         <div class="note">
-            <strong>Note:</strong> Windows may show a SmartScreen warning on first launch because
-            the executable is unsigned. Click <em>"More info" &rarr; "Run anyway"</em> to proceed.
+            <strong>SmartScreen warning:</strong> Windows may flag the exe as unrecognised on first
+            launch because it is unsigned. Click <em>"More info" &rarr; "Run anyway"</em> to proceed.
+            The software is safe and open source.
+        </div>
+    </div>
+
+    <div id="start-mac" class="tab-pane">
+        <p>macOS does not have a standalone .exe. Use pip with Python 3.8 or newer.</p>
+        <h4>1. Install Python (if not already installed)</h4>
+        <p>The easiest way is via <a href="https://brew.sh" target="_blank">Homebrew</a>:</p>
+        <pre><code>brew install python</code></pre>
+        <p>Or download directly from <a href="https://www.python.org/downloads/" target="_blank">python.org</a>.</p>
+        <h4>2. Install Cis-GS</h4>
+        <pre><code>pip3 install Cis-GS</code></pre>
+        <h4>3. Launch the GUI</h4>
+        <pre><code>cis-gs</code></pre>
+        <p>If <code>cis-gs</code> is not found:</p>
+        <pre><code>python3 -m cis_gs</code></pre>
+        <div class="note">
+            <strong>PyQt5 install issue?</strong> Try upgrading pip first:
+            <pre><code>pip3 install --upgrade pip
+pip3 install PyQt5 Cis-GS</code></pre>
+        </div>
+    </div>
+
+    <div id="start-linux" class="tab-pane">
+        <p>Linux does not have a standalone .exe. Use pip with Python 3.8 or newer.</p>
+        <h4>Ubuntu / Debian</h4>
+        <pre><code>sudo apt update
+sudo apt install python3-pip python3-pyqt5
+pip3 install Cis-GS
+cis-gs</code></pre>
+
+        <h4>Fedora / RHEL / CentOS</h4>
+        <pre><code>sudo dnf install python3-pip python3-qt5
+pip3 install Cis-GS
+cis-gs</code></pre>
+
+        <h4>Arch Linux</h4>
+        <pre><code>sudo pacman -S python-pip python-pyqt5
+pip install Cis-GS
+cis-gs</code></pre>
+
+        <p>If <code>cis-gs</code> is not found after install:</p>
+        <pre><code>python3 -m cis_gs</code></pre>
+
+        <div class="note">
+            <strong>Headless server / SSH?</strong> The GUI requires a desktop display (X11 or Wayland).
+            On a remote server without a display, use the CLI only — all analysis steps are fully
+            supported without opening the GUI:
+            <pre><code>cis-gs fetch GCF_000001735.4 -o ./genome
+cis-gs extract genome.fasta genome.gff3
+cis-gs search promoters.fasta --motifs-file motifs.txt
+# etc.</code></pre>
         </div>
     </div>
 
     <div id="start-pip" class="tab-pane">
-        <p>Requires Python 3.8 or newer. All dependencies install automatically.</p>
+        <p>Works on Windows, macOS, and Linux. Requires Python 3.8 or newer.</p>
         <div class="install-highlight">
             <strong>Install from PyPI</strong>
             <pre><code>pip install Cis-GS</code></pre>
         </div>
-        <p>Then launch the GUI:</p>
+        <p>Launch the GUI:</p>
         <pre><code>cis-gs</code></pre>
-        <p>Or if the <code>cis-gs</code> command is not found (common on some systems):</p>
-        <pre><code>python -m cis_gs</code></pre>
-        <p>To also get the CLI tools (same package, no extra install needed):</p>
-        <pre><code>cis-gs --help            # see all commands
-cis-gs fetch --help      # help for a specific command</code></pre>
+        <p>If <code>cis-gs</code> is not found:</p>
+        <pre><code>python -m cis_gs     # Windows
+python3 -m cis_gs    # macOS / Linux</code></pre>
+        <p>See all CLI commands:</p>
+        <pre><code>cis-gs --help
+cis-gs tfdb --help
+cis-gs search --help</code></pre>
     </div>
 
     <div id="start-src" class="tab-pane">
