@@ -7,6 +7,12 @@ on:
       - "v*.*.*"
   workflow_dispatch:
 
+# Opt in to Node 24 early so actions/download-artifact@v4 and
+# pypa/gh-action-pypi-publish stop emitting Node-20 deprecation warnings
+# before June 2026.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   build:
     name: Build sdist + wheel
