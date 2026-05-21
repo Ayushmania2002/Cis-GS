@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.png" alt="Cis-GS banner" width="780"/>
+<img src="https://raw.githubusercontent.com/Ayushmania2002/Cis-GS/main/assets/banner.png" alt="Cis-GS banner" width="780"/>
 
 # Cis-GS &nbsp;&middot;&nbsp; Cis-regulatory Element Genome Scanner
 
@@ -217,17 +217,11 @@ Full API reference: [`Ayushmania2002.github.io/Cis-GS/api`](https://Ayushmania20
 
 <div align="center">
 
-| Step 1: Promoter extraction | Step 2: Motif search |
-|---|---|
-| <img src="docs/source/_static/screenshot_step1.png" width="350"/> | <img src="docs/source/_static/screenshot_step2.png" width="350"/> |
+<img src="https://raw.githubusercontent.com/Ayushmania2002/Cis-GS/main/assets/banner.png" alt="Cis-GS banner" width="640"/>
 
-| Step 5: Coexpression network | Step 7: KEGG enrichment |
-|---|---|
-| <img src="docs/source/_static/screenshot_step5.png" width="350"/> | <img src="docs/source/_static/screenshot_step7.png" width="350"/> |
+*Live GUI screenshots of all 7 workflow steps are available in the [online documentation](https://Ayushmania2002.github.io/Cis-GS/).*
 
 </div>
-
-> *Screenshots are placeholder paths; replace with actual PNGs in `docs/source/_static/` before publishing.*
 
 ---
 
