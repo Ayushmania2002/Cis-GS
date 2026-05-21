@@ -1,36 +1,37 @@
 """
-cis_gs.enrichment.kegg
-──────────────────────
 KEGG pathway over-representation analysis.
 
-═══════════════════════════════════════════════════════════════════════════════
-PROVENANCE
-═══════════════════════════════════════════════════════════════════════════════
-Internal data model:
+**Internal data model**
 
-    Per-species KEGG pathway tables:
-        per-species `pathway`     (gene → pathwayID)
-                    `pathwayInfo` (pathwayID → name, gene_count, URL)
-                    `categories`  (pathwayID → high-level category)
-        We keep the same three logical tables, just materialised on-the-fly
-        from KEGG REST instead of shipped as a 5-GB SQLite bundle.
+Per-species KEGG pathway tables:
 
-    Species-specific KEGG enrichment:
-        the "organism code -> species-specific KEGG enrichment" idea
-        (KEGG uses 3-letter codes - ath = Arabidopsis, hsa = Human, mmu = Mouse)
+* ``pathway``     - gene to pathway-ID mapping
+* ``pathwayInfo`` - pathway-ID to (name, gene_count, URL)
+* ``categories``  - pathway-ID to high-level category
 
-What's original here:
-    ▸ Direct REST queries to https://rest.kegg.jp/ - three endpoints only:
-          /list/pathway/<org>          → pathway IDs + descriptions
-          /link/<org>/pathway          → gene ↔ pathway membership
-          /find/genes/<symbol>         → resolve gene symbols to KEGG IDs
-      Together those provide everything a per-species SQLite dump would,
-      streamed over HTTP in <2 s per organism.
-    ▸ Two-tier disk + memory cache so the second `enrich-kegg` call on the
-      same organism is instantaneous.
-    ▸ Auto fallback: if the user's gene IDs are gene symbols / Ensembl /
-      Entrez (KEGG itself uses NCBI Gene ID for animals and locus tag for
-      plants), we route through KEGG's `conv` endpoint to translate.
+We keep the same three logical tables that a bundled SQLite dump would
+expose, just materialised on-the-fly from KEGG REST instead of shipped
+as a 5 GB blob.
+
+KEGG identifies every species by a three-letter organism code
+(``ath`` = Arabidopsis, ``hsa`` = Human, ``mmu`` = Mouse, ...) and we
+keep all enrichment scoped to one organism at a time.
+
+**What's original here**
+
+* Direct REST queries to ``https://rest.kegg.jp/`` - three endpoints:
+
+  - ``/list/pathway/<org>`` - pathway IDs + descriptions
+  - ``/link/<org>/pathway`` - gene to pathway membership
+  - ``/find/genes/<symbol>`` - resolve gene symbols to KEGG IDs
+
+  Together those provide everything a per-species SQLite dump would,
+  streamed over HTTP in under 2 s per organism.
+* Two-tier disk + memory cache so the second ``enrich-kegg`` call on the
+  same organism is instantaneous.
+* Auto fallback: if the user's gene IDs are gene symbols / Ensembl /
+  Entrez (KEGG itself uses NCBI Gene ID for animals and locus tags for
+  plants), we route through KEGG's ``conv`` endpoint to translate.
 """
 
 from __future__ import annotations

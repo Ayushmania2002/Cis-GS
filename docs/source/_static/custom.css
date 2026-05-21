@@ -113,6 +113,25 @@ a:hover {
     border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
+/* ── Force long lines (docstrings, formulas) to wrap inside content ─ */
+.rst-content p,
+.rst-content li,
+.rst-content dd,
+.rst-content dt,
+.rst-content blockquote {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: normal;
+    hyphens: auto;
+}
+
+.rst-content pre,
+.rst-content .highlight pre {
+    white-space: pre;          /* keep code formatting */
+    overflow-x: auto;          /* horizontal scroll instead of spilling */
+    max-width: 100%;
+}
+
 /* ── Mobile / narrow viewports ───────────────────────────────────── */
 @media (max-width: 768px) {
     .wy-nav-content {

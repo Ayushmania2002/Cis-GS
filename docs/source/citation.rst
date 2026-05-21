@@ -26,10 +26,20 @@ GitHub also picks up the ``CITATION.cff`` in the repo root and exposes a
 Acknowledgements
 ----------------
 
-* **PlantTFDB v5** — Tian et al., *Nucleic Acids Res.*, 2020.
-* **AnimalTFDB v4** — Shen et al., *Nucleic Acids Res.*, 2023.
-* **JASPAR 2024** — Rauluseviciute et al., *Nucleic Acids Res.*, 2024.
-* **HOCOMOCO v11** — Kulakovskiy et al., *Nucleic Acids Res.*, 2018.
+Cis-GS stands on the shoulders of these databases and tools — please cite
+the original work whenever you use the corresponding feature:
+
+* **PlantTFDB v5** — Tian *et al.*, *Nucleic Acids Res.*, 2020.
+  `doi:10.1093/nar/gkz1020 <https://doi.org/10.1093/nar/gkz1020>`_
+* **AnimalTFDB v4** — Shen *et al.*, *Nucleic Acids Res.*, 2023.
+  `doi:10.1093/nar/gkac907 <https://doi.org/10.1093/nar/gkac907>`_
+* **JASPAR 2024** — Rauluseviciute *et al.*, *Nucleic Acids Res.*, 2024.
+  `doi:10.1093/nar/gkad1059 <https://doi.org/10.1093/nar/gkad1059>`_
+* **HOCOMOCO v11** — Kulakovskiy *et al.*, *Nucleic Acids Res.*, 2018.
+  `doi:10.1093/nar/gkx1106 <https://doi.org/10.1093/nar/gkx1106>`_
 * **KEGG** — Kanehisa M., *Protein Sci.*, 2019.
-* **MyGene.info** — Wu et al., *Genome Biol.*, 2013.
+  `doi:10.1002/pro.3715 <https://doi.org/10.1002/pro.3715>`_
+* **MyGene.info** — Wu *et al.*, *Nucleic Acids Res.*, 2013.
+  `doi:10.1093/nar/gks1114 <https://doi.org/10.1093/nar/gks1114>`_
 * **logomaker** — Tareen & Kinney, *Bioinformatics*, 2020.
+  `doi:10.1093/bioinformatics/btz921 <https://doi.org/10.1093/bioinformatics/btz921>`_

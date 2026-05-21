@@ -1,29 +1,27 @@
 """
-cis_gs.enrichment.core
-──────────────────────
 Generic over-representation analysis (ORA) primitives shared by every
-enrichment back-end (GO, KEGG, custom gene sets, motif targets …).
+enrichment back-end (KEGG, custom gene sets, motif targets, ...).
 
-═══════════════════════════════════════════════════════════════════════════════
-STATISTICAL KERNEL
-═══════════════════════════════════════════════════════════════════════════════
+**Statistical kernel**
+
 Standard one-sided hypergeometric over-representation test with
-Benjamini-Hochberg FDR correction:
+Benjamini-Hochberg FDR correction::
 
-    pval = scipy.stats.hypergeom.sf(k - 1, totalN, n, listN)
-    over-rep filter: keep terms where k / n > listN / totalN
-    fold-enrichment: (k / listN) / (n / totalN)
-    bh_fdr()  - re-uses Cis-GS's from-scratch Benjamini-Hochberg
-                routine from app_v4_open.py (no scipy.multitest dependency).
+    pval            = scipy.stats.hypergeom.sf(k - 1, totalN, n, listN)
+    over-rep filter = keep terms where k/n > listN/totalN
+    fold-enrichment = (k / listN) / (n / totalN)
 
-Two implementation notes specific to Cis-GS:
+:func:`bh_fdr` re-uses Cis-GS's from-scratch Benjamini-Hochberg routine
+from ``app_v4_open.py`` (no ``scipy.multitest`` dependency).
 
-    1.  A *single* vectorised pass over thousands of pathways - we treat
-        the whole pathway table as a NumPy column operation instead of
-        looping one category at a time.
-    2.  Optional minimum-overlap and gene-symbol-cleaning guards that prevent
-        the spurious "1-gene-overlap pathway with q~0" hits that surface on
-        small query lists.
+**Two implementation notes specific to Cis-GS**
+
+1. A *single* vectorised pass over thousands of pathways - we treat the
+   whole pathway table as a NumPy column operation instead of looping
+   one category at a time.
+2. Optional minimum-overlap and gene-symbol-cleaning guards that prevent
+   the spurious "1-gene-overlap pathway with q~0" hits that surface on
+   small query lists.
 """
 
 from __future__ import annotations

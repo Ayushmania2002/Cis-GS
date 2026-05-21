@@ -1,25 +1,18 @@
 """
-cis_gs.enrichment.idmap
-───────────────────────
 Auto-detecting gene-identifier converter.
 
-═══════════════════════════════════════════════════════════════════════════════
-PROVENANCE
-═══════════════════════════════════════════════════════════════════════════════
-The high-level flow is: "guess the input ID type, translate to a canonical
-key, return a (user_input, ensembl_gene_id, species) frame".  Cis-GS
-replaces the 17 GB SQLite mapping table the naive approach would need
+The high-level flow is: *guess the input ID type, translate to a canonical
+key, return a (user_input, ensembl_gene_id, species) frame*. Cis-GS
+replaces the ~17 GB SQLite mapping table the naive approach would need
 with three lightweight back-ends:
 
-
-
-    1.  An offline regex pre-classifier (cheap, no network) that recognises
-        the common plant + animal ID syntaxes Cis-GS encounters in practice.
-    2.  MyGene.info /query and /querymany REST endpoints for any ID type the
-        regex doesn't catch (vertebrates + plants).
-    3.  A small handcrafted Arabidopsis-locus table (TAIR uses AT[1-5MC]G\\d{5})
-        because TAIR is the most common Cis-GS use-case and MyGene.info's
-        Arabidopsis coverage is uneven.
+1. An offline regex pre-classifier (cheap, no network) that recognises
+   the common plant + animal ID syntaxes Cis-GS encounters in practice.
+2. MyGene.info ``/query`` and ``/querymany`` REST endpoints for any ID
+   type the regex doesn't catch (vertebrates + plants).
+3. A small handcrafted Arabidopsis-locus table (TAIR uses
+   ``AT[1-5MC]G\\d{5}``) because TAIR is the most common Cis-GS
+   use-case and MyGene.info's Arabidopsis coverage is uneven.
 
 The order matters: fast regex first, network only on misses, with an
 optional species hint that accelerates the lookup when supplied.
