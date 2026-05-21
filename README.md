@@ -1,435 +1,296 @@
-# Cis-GS — Cis-regulatory Element Genome Scanner
+<div align="center">
 
-[![PyPI version](https://img.shields.io/pypi/v/Cis-GS?color=teal)](https://pypi.org/project/Cis-GS/)
-[![Python versions](https://img.shields.io/pypi/pyversions/Cis-GS)](https://pypi.org/project/Cis-GS/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Win%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/Ayushmania2002/Cis-GS/releases)
+<img src="assets/banner.png" alt="Cis-GS banner" width="780"/>
 
-A complete pipeline for analyzing transcription factor binding sites across genomes — from NCBI genome download to interactive co-expression networks. Works as a GUI desktop app, a command-line tool, or a standalone Windows `.exe`.
+# Cis-GS &nbsp;&middot;&nbsp; Cis-regulatory Element Genome Scanner
 
-Developed at the **Plant Signaling Lab, IISER Tirupati**.
+**A whole-genome pipeline for discovering cis-regulatory elements, coupling them to expression, and finishing with KEGG enrichment — in one PyQt5 desktop app *and* one interactive CLI.**
+
+[![PyPI version](https://img.shields.io/pypi/v/cis-gs.svg?color=16A085)](https://pypi.org/project/cis-gs/)
+[![Python](https://img.shields.io/pypi/pyversions/cis-gs.svg)](https://pypi.org/project/cis-gs/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-16A085)](https://Ayushmania2002.github.io/Cis-GS/)
+[![Build](https://github.com/Ayushmania2002/Cis-GS/actions/workflows/docs.yml/badge.svg)](https://github.com/Ayushmania2002/Cis-GS/actions)
+[![DOI](https://img.shields.io/badge/DOI-pending-lightgrey)](#citation)
+
+</div>
+
+---
+
+## Table of Contents
+
+- [What Cis-GS Does](#what-cis-gs-does)
+- [Highlights of v1.1](#highlights-of-v11)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [The 7-Step Workflow](#the-7-step-workflow)
+- [Supported Motif Databases](#supported-motif-databases)
+- [CLI Reference](#cli-reference)
+- [Programmatic API](#programmatic-api)
+- [Screenshots](#screenshots)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [Citation](#citation)
+- [License](#license)
+- [Contact](#contact)
+
+---
+
+## What Cis-GS Does
+
+Cis-GS automates the full **promoter &rarr; motif &rarr; expression &rarr; function** journey that
+plant- and animal-genomics labs run by hand today:
+
+1. **Fetch** a reference genome + annotation directly from NCBI (live Assembly search).
+2. **Extract** promoter sequences (configurable length, strand-aware, intergenic-clipped) from any GFF3.
+3. **Scan** those promoters for transcription-factor binding motifs imported from PlantTFDB, AnimalTFDB, JASPAR 2024, or HOCOMOCO v11 — or any user-supplied IUPAC consensus.
+4. **Render** publication-ready sequence logos and per-gene hit tables with hypergeometric p-values and BH-FDR.
+5. **Couple** the hits to your expression table (RNA-seq, microarray, qPCR) to flag motifs whose presence tracks expression direction.
+6. **Build** a co-expression network (Pearson / Spearman / WGCNA-style soft-thresholding), detect modules via Louvain or hierarchical clustering, and visualise eigengenes.
+7. **Enrich** the top module / cluster against KEGG (live REST queries, 11 700+ organisms) with one-sided hypergeometric ORA + Benjamini-Hochberg FDR.
+
+Everything runs **locally**, **offline-friendly after the first network fetch**, and exports CSV / SVG / PDF at every step.
+
+---
+
+## Highlights of v1.1
+
+- **Live KEGG dropdown** — every one of the 11 700+ organisms KEGG knows about, fetched on demand. No more stale species tables.
+- **Live NCBI Taxonomy search** — type any common or Latin name; results stream back as you type.
+- **60× faster ID conversion** — MyGene.info batched POST + progress bar (previously 60+ minutes for 10 k genes; now ~60 s).
+- **Interactive CLI wizards** — `cis-gs wizard` walks you through every step with arrow-key menus. Every subcommand also accepts `-i / --interactive`.
+- **Fuzzy "did you mean...?"** for CLI typos.
+- **Brand-icon Contact tab** with real-website logos (LinkedIn, GitHub, KEGG, NCBI, PlantTFDB, AnimalTFDB, MyGene).
+- **Modern single-color theme** (teal `#16A085`) with instant light / dark toggle — no more 1-2 s freeze.
+- **First-run NCBI email prompt** — required by the Entrez API, stored only on your machine.
+- **Three Gene-ID-Mapping methods** for the annoying NCBI-LOC vs species-database mismatch (column swap, mapping CSV, GFF3 Dbxref expansion).
+
+See the [full release notes](https://github.com/Ayushmania2002/Cis-GS/releases) for the v1.0 &rarr; v1.1 diff.
 
 ---
 
 ## Installation
 
-### Option 1 — Standalone Windows .exe (No Python required)
-
-Download `Cis-GS.zip` from the [**GitHub Releases**](https://github.com/Ayushmania2002/Cis-GS/releases/latest) page, extract it, and double-click `Cis-GS.exe`. No Python, no pip, no dependencies needed.
-
-> **Note:** Windows may show a SmartScreen warning on first launch. Click **"More info" → "Run anyway"** to proceed.
-
-### Option 2 — Windows / Linux / macOS via pip (GUI + CLI)
-
-All platforms with Python 3.8+ installed:
+### Option 1 — PyPI (Linux / macOS / Windows)
 
 ```bash
-pip install Cis-GS
-cis-gs
+pip install cis-gs
+cis-gs --help          # CLI
+cis-gs-gui             # GUI
 ```
 
-If `cis-gs` is not found after install (PATH not configured), use:
-```bash
-python -m cis_gs        # Windows
-python3 -m cis_gs       # Linux / macOS
-```
+Python 3.9+ required. The first GUI launch will pop up a one-time NCBI email prompt.
 
-#### macOS
+### Option 2 — Standalone Windows executable
 
-```bash
-# Install Python 3 if not already installed (via Homebrew)
-brew install python
+Download `Cis-GS.exe` from the [latest release](https://github.com/Ayushmania2002/Cis-GS/releases) page.
+Double-click. No Python install needed. Roughly 120 MB.
 
-pip3 install Cis-GS
-cis-gs
-```
-
-> **macOS note:** If PyQt5 fails to install, try:
-> ```bash
-> pip3 install --upgrade pip
-> pip3 install PyQt5 Cis-GS
-> ```
-
-#### Linux (Ubuntu / Debian)
-
-```bash
-# Install system PyQt5 and pip if needed
-sudo apt update
-sudo apt install python3-pip python3-pyqt5
-
-pip3 install Cis-GS
-cis-gs
-```
-
-#### Linux (Fedora / RHEL / CentOS)
-
-```bash
-sudo dnf install python3-pip python3-qt5
-pip3 install Cis-GS
-cis-gs
-```
-
-> **Linux note:** If you see a display error (`cannot connect to X server`), make sure you are running a desktop session, not a headless SSH terminal. For headless servers, use the CLI only — the GUI requires a display.
-
-### Option 3 — From Source
+### Option 3 — From source
 
 ```bash
 git clone https://github.com/Ayushmania2002/Cis-GS.git
 cd Cis-GS
-pip install -e .
-cis-gs
+pip install -e ".[dev,docs]"
+python app_v4_open.py        # GUI
+python -m cis_gs --help      # CLI
 ```
+
+Full build details (PyInstaller spec, build scripts for all 3 OSes, PyPI release workflow):
+see [`BUILD.md`](BUILD.md).
 
 ---
 
-## What Does Cis-GS Do?
+## Quick Start
 
-Cis-GS takes you from a raw genome to a list of transcription factor binding sites and their expression context, step by step:
+### GUI (one minute)
 
+```bash
+cis-gs-gui
 ```
-[TF Databases]    PlantTFDB / JASPAR / HOCOMOCO  →  motif patterns
-                                     ↓
-[Step 1]          NCBI genome + GFF3 annotation
-                                     ↓
-[Step 2]          Extract upstream promoter sequences (N bp per gene)
-                                     ↓
-[Step 3]          Scan promoters for TFBS using IUPAC motif patterns
-                                     ↓
-         ┌─────────────────┬──────────────────────┐
-         ↓                 ↓                      ↓
-   Sequence Logos    Expression Feeding    Co-expression Network
-   (Step 4)          (Step 5)              (Step 6a) + K-means (6b)
+
+1. **Step 1 — Promoters**: drop a FASTA + GFF3, set promoter length (default 2 kb), click *Extract*.
+2. **Step 2 — Motif Search**: click *Import from PlantTFDB* (or AnimalTFDB), pick your species, tick the motifs you want, *Import Selected*.
+3. **Step 7 — KEGG Enrichment**: pick a KEGG organism from the live dropdown, paste your gene list, run.
+
+Done. CSVs and SVGs land in `~/CisGS-Workspace/`.
+
+### CLI (interactive wizard)
+
+```bash
+cis-gs wizard
 ```
+
+The wizard auto-detects what you've already produced and offers the next sensible step.
+
+### CLI (one-liners)
+
+```bash
+# Extract 2 kb promoters from a GFF3 + FASTA
+cis-gs extract --fasta genome.fa --gff annot.gff3 --upstream 2000 --out promoters.fa
+
+# Scan promoters with a MEME motif file
+cis-gs search --promoters promoters.fa --motifs motifs.meme --out hits.csv
+
+# KEGG enrichment
+cis-gs enrich-kegg --organism ath --genes top_module.txt --out kegg.csv
+```
+
+Every command supports `-i / --interactive` if you want to be walked through it.
 
 ---
 
-## Step-by-Step Usage
+## The 7-Step Workflow
 
-### Using the GUI
+| Step | What it does | Output |
+|---|---|---|
+| **1. Promoters** | Strand-aware promoter extraction from any FASTA + GFF3 | `promoters.fa` |
+| **2. Motif Search** | IUPAC / MEME / PlantTFDB / AnimalTFDB scanning with hypergeometric p-values + BH-FDR | `hits.csv`, significance summary |
+| **3. Motif Logos** | logomaker sequence logos with information-content shading | per-motif SVG / PNG |
+| **4. Expression Feeding** | Joins hits with an expression CSV via three Gene-ID-Mapping methods (LOC swap, mapping CSV, GFF3 Dbxref expansion) | `expression_matched.csv` |
+| **5. Coexpression** | Pearson / Spearman / WGCNA-style soft-thresholding, Louvain / hierarchical module detection | `network.gexf`, eigengene plot |
+| **6. K-means** | Elbow + silhouette, deterministic seeding, exportable per-cluster gene lists | `clusters/*.txt` |
+| **7. KEGG Enrichment** | Live REST query against any of 11 700+ KEGG organisms, hypergeometric ORA, BH-FDR, fold-enrichment | `kegg_enrichment.csv` |
 
-Launch with `cis-gs` (or double-click the .exe). Eight tabs appear across the top — work left to right.
-
-#### Step 0 — Get TF Motifs (recommended first)
-
-Before scanning, you need motif patterns from a database.
-
-**For plant species (PlantTFDB):**
-1. Go to the **Step 2** tab → click **"Import from PlantTFDB"**
-2. Search for your organism (e.g., "arabidopsis"), select it from the dropdown
-3. Click **"Download from PlantTFDB Server"** and choose a save folder
-4. Switch to the **"Browse & Import"** tab in the dialog
-5. Filter by TF Family (e.g., MYB, ERF, WRKY), tick your motifs
-6. Click **"Import Selected → Step 2"**
-
-**For animal/vertebrate species (JASPAR / HOCOMOCO):**
-1. Go to the **Step 2** tab → click **"Import from JASPAR/HOCOMOCO"**
-2. Select a dataset (e.g., JASPAR 2024 Vertebrates or HOCOMOCO Human)
-3. Download, browse, filter by species or family, then import
-
-#### Step 1 — NCBI Fetch Tab
-
-1. Type your organism name (e.g., *Arabidopsis thaliana*) and press **Search**
-2. Select an assembly from the results table
-3. Tick **Download FASTA** and **Download GFF3**, choose an output folder
-4. Click **Download** — a progress bar shows progress and a **Stop** button lets you cancel
-
-#### Step 2 — Promoter Extraction (Step 1 Tab)
-
-1. Click **Browse** to select the downloaded FASTA and GFF3 files
-2. Set the promoter length (default: 2000 bp upstream of TSS)
-3. Click **Extract Promoters**
-4. Outputs: `promoters.fasta` and `promoters.tsv` (summary table)
-
-#### Step 3 — Motif Search (Step 2 Tab)
-
-1. The promoter FASTA auto-fills from the previous step
-2. Motifs from the database import also auto-fill; or type IUPAC patterns manually:
-   ```
-   MYB|AT1G00010    AACCGTTA
-   ERF|AT2G00020    GCAGCCGCC
-   ```
-3. Click **Run Scan** — results appear in the table and are saved as a CSV
-
-#### Step 4 — Sequence Logos (Step 3 Tab)
-
-1. Select the motif hits CSV from Step 3
-2. Optionally filter by sequence length
-3. Click **Generate Logo** — a PNG sequence logo is saved
-
-#### Step 5 — Expression Feeding (Expression Tab)
-
-1. Load your gene expression CSV (rows = genes, columns = samples/time-points)
-2. Load the motif hits CSV from Step 3
-3. Click **Match Genes** — output is a filtered expression CSV containing only genes with motif hits
-
-#### Step 6a — Co-expression Network (Co-expression Tab)
-
-1. Load the filtered expression CSV from Step 5
-2. Set the correlation method (Pearson or Spearman) and threshold (default: 0.7)
-3. Click **Run Analysis** — outputs:
-   - Correlation heatmap (PNG)
-   - Interactive HTML5 network (opens in your browser)
-   - Module membership CSV (gene → module)
-
-#### Step 6b — K-means Clustering (K-means Tab)
-
-1. Load an expression CSV
-2. Set K (number of clusters; start with K = 5–8)
-3. Click **Run K-means** — outputs:
-   - Cluster assignments CSV
-   - Centroid profiles CSV
-   - Spaghetti plot PNG (expression trajectories coloured by cluster)
-
----
-
-### Using the CLI
-
-After `pip install Cis-GS`, every GUI feature is available from the command line. Run `cis-gs` with no arguments to open the GUI, or pass a subcommand.
-
-Get help for any command:
-```bash
-cis-gs --help
-cis-gs tfdb --help
-cis-gs search --help
-```
-
-#### Step 0 — Get TF Motifs
-
-```bash
-# Find your species code in PlantTFDB
-cis-gs tfdb species --search arabidopsis     # → code: Ath
-cis-gs tfdb species --search oryza           # → code: Osa
-cis-gs tfdb species                          # list all 157+ species
-
-# Download PlantTFDB motifs for your species
-cis-gs tfdb download Ath -o ./motif_db
-
-# Explore what TF families are available
-cis-gs tfdb filter ./motif_db/Ath_TF_binding_motifs.meme --list-families
-
-# Export motifs for a specific family
-cis-gs tfdb filter ./motif_db/Ath_TF_binding_motifs.meme \
-       --info ./motif_db/Ath_TF_binding_motifs_information.txt \
-       --family MYB -o myb_motifs.txt
-
-# For vertebrates / animals — list available datasets
-cis-gs tfdb sources
-cis-gs tfdb download-db jaspar2024_vertebrates -o ./motif_db
-cis-gs tfdb download-db hocomoco_human -o ./motif_db
-
-# Filter JASPAR by species
-cis-gs tfdb filter ./motif_db/JASPAR2024_CORE_vertebrates_non-redundant.meme \
-       --species "Homo sapiens" --family GATA -o gata_motifs.txt
-```
-
-The output motifs file (`myb_motifs.txt`) is tab-separated: `NAME<TAB>IUPAC_SEQUENCE` per line.
-
-#### Step 1 — Download Genome from NCBI
-
-Find your assembly accession at [ncbi.nlm.nih.gov/assembly](https://www.ncbi.nlm.nih.gov/assembly):
-
-```bash
-cis-gs fetch GCF_000001735.4 -o ./genome
-```
-
-Output files:
-```
-./genome/GCF_000001735.4_genomic.fasta
-./genome/GCF_000001735.4_genomic.gff3
-```
-
-Options:
-```bash
-cis-gs fetch GCF_000001735.4 --no-fasta    # GFF3 only
-cis-gs fetch GCF_000001735.4 --no-gff      # FASTA only
-```
-
-#### Step 2 — Extract Promoter Sequences
-
-```bash
-cis-gs extract ./genome/GCF_000001735.4_genomic.fasta \
-               ./genome/GCF_000001735.4_genomic.gff3 \
-               -l 1500 -o promoters.fasta
-```
-
-`-l 1500` extracts 1500 bp upstream per gene (default: 1000 bp). Output:
-```
-promoters.fasta    # one sequence per gene
-promoters.tsv      # table: gene ID, chromosome, coordinates, strand
-```
-
-#### Step 3 — Scan for TFBS Motif Hits
-
-```bash
-# Using the motifs file from Step 0
-cis-gs search promoters.fasta --motifs-file myb_motifs.txt -o hits.csv
-
-# Or type motifs inline
-cis-gs search promoters.fasta -m ACGTG -m RGATCY -o hits.csv
-
-# Forward strand only
-cis-gs search promoters.fasta --motifs-file myb_motifs.txt --no-revcomp
-```
-
-Output `hits.csv` columns: `gene_id, motif_name, pattern, strand, position, matched_seq`
-
-#### Step 4 — Build Sequence Logos
-
-```bash
-cis-gs logo hits.csv -o ./logos
-cis-gs logo hits.csv -o ./logos --scale probability
-```
-
-One PNG per motif name, saved to `./logos/`.
-
-#### Step 5 — Filter Expression Data
-
-```bash
-cis-gs feed hits.csv expression.csv -o filtered_expr.csv
-```
-
-Gene ID prefix differences (`gene-`, `rna-`) and version suffixes (`.1`) are handled automatically.
-
-Expression CSV format:
-```
-gene_id,0h,6h,12h,24h
-AT1G00010,5.2,8.1,6.3,4.9
-AT1G00020,1.1,1.3,1.2,1.0
-```
-
-#### Step 6a — Co-expression Network
-
-```bash
-cis-gs coexpr filtered_expr.csv -o ./coexpr_results
-
-# Spearman correlation, stricter threshold
-cis-gs coexpr filtered_expr.csv --method spearman --threshold 0.8 --hide-isolated
-```
-
-Output files in `./coexpr_results/`:
-```
-correlation_matrix.csv          pairwise correlation values
-correlation_heatmap.png         heatmap image
-module_membership.csv           gene → co-expression module
-coexpression_network.html       interactive network (open in browser)
-coexpression_network.png        static network image
-```
-
-#### Step 6b — K-means Clustering
-
-```bash
-cis-gs kmeans filtered_expr.csv -k 6 -o ./clusters
-```
-
-Output files:
-```
-kmeans_clusters.csv     gene → cluster assignment
-kmeans_centroids.csv    mean expression profile per cluster
-kmeans_plot.png         spaghetti plot of expression trajectories
-```
-
-#### Full One-liner Example
-
-```bash
-# Arabidopsis MYB binding site analysis — complete pipeline
-cis-gs tfdb download Ath -o ./db
-cis-gs tfdb filter ./db/Ath_TF_binding_motifs.meme \
-       --info ./db/Ath_TF_binding_motifs_information.txt \
-       --family MYB -o myb_motifs.txt
-cis-gs fetch GCF_000001735.4 -o ./genome
-cis-gs extract ./genome/GCF_000001735.4_genomic.fasta \
-               ./genome/GCF_000001735.4_genomic.gff3 \
-               -l 2000 -o promoters.fasta
-cis-gs search promoters.fasta --motifs-file myb_motifs.txt -o myb_hits.csv
-cis-gs logo myb_hits.csv -o ./logos
-cis-gs feed myb_hits.csv expression.csv -o filtered_expr.csv
-cis-gs coexpr filtered_expr.csv -o ./coexpr_results
-cis-gs kmeans filtered_expr.csv -k 6 -o ./clusters
-```
+A full description of each step's algorithm and parameters lives in the
+[online documentation](https://Ayushmania2002.github.io/Cis-GS/).
 
 ---
 
 ## Supported Motif Databases
 
-| Database | Coverage | CLI Command |
+| Database | Coverage | Access |
 |---|---|---|
-| **PlantTFDB** | 157+ plant species | `cis-gs tfdb download <code>` |
-| **JASPAR 2024 Vertebrates** | ~575 non-redundant profiles | `cis-gs tfdb download-db jaspar2024_vertebrates` |
-| **JASPAR 2024 Insects** | ~99 non-redundant profiles | `cis-gs tfdb download-db jaspar2024_insects` |
-| **HOCOMOCO v11 Human** | ~700 ChIP-Seq motifs | `cis-gs tfdb download-db hocomoco_human` |
-| **HOCOMOCO v11 Mouse** | ~400 ChIP-Seq motifs | `cis-gs tfdb download-db hocomoco_mouse` |
+| **PlantTFDB v5** | 157 plant species, ~6 000 motifs | Built-in importer with live species list |
+| **AnimalTFDB v4** | Human, mouse, zebrafish, insects | Built-in importer |
+| **JASPAR 2024 (non-redundant)** | 575 vertebrate + 99 insect motifs | Direct REST download |
+| **HOCOMOCO v11** | ~700 human + ~400 mouse ChIP-Seq motifs | Direct REST download |
+| **Custom IUPAC / MEME** | Anything you can write down | Paste into Step 2 |
 
 ---
 
-## Data Formats
+## CLI Reference
 
-### Inputs
+```text
+cis-gs --help
 
-| Format | Used for |
-|---|---|
-| FASTA | Genome sequences (from NCBI) |
-| GFF3 | Gene annotations (from NCBI) |
-| IUPAC pattern | Motif consensus (e.g., `RGATCY`, `AACCGTTA`) |
-| MEME | Position frequency matrices from PlantTFDB / JASPAR / HOCOMOCO |
-| CSV | Gene expression matrix (genes × samples) |
+usage: cis-gs [-h] {wizard,fetch,extract,search,feed,coexpr,kmeans,enrich-kegg,id-convert} ...
 
-### IUPAC Codes
-
+  wizard         Step-by-step wizard (recommended for new users)
+  fetch          Download a genome + annotation from NCBI
+  extract        Extract promoter sequences from FASTA + GFF3
+  search         Scan promoters for motif occurrences
+  feed           Couple motif hits with an expression table
+  coexpr         Build a co-expression network
+  kmeans         K-means clustering with elbow / silhouette
+  enrich-kegg    KEGG over-representation analysis
+  id-convert     Convert gene IDs across namespaces (MyGene.info, batched)
 ```
-R=A/G  Y=C/T  S=G/C  W=A/T  K=G/T  M=A/C
-B=C/G/T  D=A/G/T  H=A/C/T  V=A/C/G  N=any
-```
 
-### Outputs
-
-| File | Produced by |
-|---|---|
-| `promoters.fasta` | `extract` |
-| `motif_hits.csv` | `search` |
-| `logos/*.png` | `logo` |
-| `filtered_expression.csv` | `feed` |
-| `correlation_heatmap.png` | `coexpr` |
-| `coexpression_network.html` | `coexpr` |
-| `module_membership.csv` | `coexpr` |
-| `kmeans_clusters.csv` | `kmeans` |
-| `kmeans_plot.png` | `kmeans` |
+Every subcommand accepts `-i / --interactive` for a guided run, and `--help` for full flags.
 
 ---
 
-## Requirements
+## Programmatic API
 
-- Python ≥ 3.8
-- All dependencies install automatically via pip:
+```python
+from cis_gs.enrichment import KEGGEnricher
 
+e = KEGGEnricher(organism="ath")          # Arabidopsis
+result = e.enrich(["AT1G01010", "AT2G18790", "AT3G09600"])
+print(result.table.head())
 ```
-PyQt5, numpy, pandas, scipy, matplotlib, seaborn,
-biopython, scikit-learn, logomaker, Pillow, networkx, python-louvain
+
+```python
+from cis_gs.enrichment.idmap import IDConverter
+
+idc = IDConverter(species="human")
+mapping = idc.convert(["TP53", "BRCA1", "MYC"], target="entrez")
+```
+
+Full API reference: [`Ayushmania2002.github.io/Cis-GS/api`](https://Ayushmania2002.github.io/Cis-GS/api.html).
+
+---
+
+## Screenshots
+
+<div align="center">
+
+| Step 1: Promoter extraction | Step 2: Motif search |
+|---|---|
+| <img src="docs/source/_static/screenshot_step1.png" width="350"/> | <img src="docs/source/_static/screenshot_step2.png" width="350"/> |
+
+| Step 5: Coexpression network | Step 7: KEGG enrichment |
+|---|---|
+| <img src="docs/source/_static/screenshot_step5.png" width="350"/> | <img src="docs/source/_static/screenshot_step7.png" width="350"/> |
+
+</div>
+
+> *Screenshots are placeholder paths; replace with actual PNGs in `docs/source/_static/` before publishing.*
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| `cis-gs-gui: command not found` after `pip install` | Scripts dir not on `PATH` | `python -m cis_gs` works, or add `pip --user` bin dir to PATH |
+| First NCBI Fetch returns 0 results | NCBI email not set | Settings &rarr; Set NCBI Email, then retry |
+| `KEGG REST unreachable` | Firewall or VPN | Set `HTTPS_PROXY` env var, or use the *Browse & Import* tab with a manually downloaded MEME |
+| Motif hits CSV has empty `gene_symbol` column | Annotation GFF3 not loaded in Step 2 | Re-run with the same GFF3 from Step 1 in *Gene ID Resolution* |
+| Coexpression freezes on > 30k genes | All-vs-all correlation is O(n²) | Pre-filter to expressed genes (TPM > 1) before Step 5 |
+
+Open an [issue](https://github.com/Ayushmania2002/Cis-GS/issues) with the log file from `~/CisGS-Workspace/cisgs.log` if you hit anything else.
+
+---
+
+## Contributing
+
+Bug reports, feature requests, and pull requests are welcome.
+For substantial contributions please open an issue first to discuss the change.
+
+```bash
+git clone https://github.com/Ayushmania2002/Cis-GS.git
+cd Cis-GS
+pip install -e ".[dev]"
+pytest                       # run the test suite
 ```
 
 ---
 
 ## Citation
 
-If you use Cis-GS in your research, please cite:
+If Cis-GS contributes to a publication, please cite:
 
-> [Authors] (2026). Cis-GS: A comprehensive tool for cis-regulatory element analysis across genomes. [Journal/Preprint]. DOI: [your-doi]
+> Mallick A. *Cis-GS: a unified pipeline for whole-genome cis-regulatory element
+> discovery, expression coupling, and KEGG enrichment.* (manuscript in preparation,
+> Plant Signaling Lab, IISER Tirupati, 2026).
+
+BibTeX:
+
+```bibtex
+@software{mallick_cisgs_2026,
+  author  = {Mallick, Ayushman},
+  title   = {{Cis-GS}: Cis-regulatory Element Genome Scanner},
+  year    = {2026},
+  url     = {https://github.com/Ayushmania2002/Cis-GS},
+  version = {1.1.0}
+}
+```
+
+A `CITATION.cff` is included for GitHub's automatic citation widget.
 
 ---
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+Released under the [MIT License](LICENSE). Free for academic and commercial use.
 
 ---
 
 ## Contact
 
-**Ayushman Mallick**
-- GitHub: [github.com/Ayushmania2002](https://github.com/Ayushmania2002)
-- LinkedIn: [linkedin.com/in/ayushman-mallick-68490922b](https://www.linkedin.com/in/ayushman-mallick-68490922b)
-- Email: ayushmania2002@gmail.com
+**Ayushman Mallick** &middot; ayushmania2002@gmail.com
+Plant Signaling Lab, [IISER Tirupati](https://www.iisertirupati.ac.in/)
 
-**Plant Signaling Lab**, IISER Tirupati
-- Website: [srchoudhury0.wixsite.com/plant-signaling-lab](https://srchoudhury0.wixsite.com/plant-signaling-lab)
-
-Bug reports & feature requests: [github.com/Ayushmania2002/Cis-GS/issues](https://github.com/Ayushmania2002/Cis-GS/issues)
+<sub>&copy; 2026 Ayushman Mallick &middot; Plant Signaling Lab &middot; Cis-GS</sub>
