@@ -7,6 +7,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Opt in to Node 24 early so actions/deploy-pages@v4 stops emitting
+# the Node-20 deprecation warning before June 2026.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 # Allow the workflow to publish to gh-pages
 permissions:
   contents: read
