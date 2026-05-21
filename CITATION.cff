@@ -1,23 +1,35 @@
 cff-version: 1.2.0
-message: "If you use this code, please cite the corresponding manuscript and this software repository."
-title: "CYC-re-Genome-Scanner: Genome-wide cis-regulatory and coexpression analysis of CYCLOPS-associated genes"
+message: "If you use Cis-GS, please cite this software repository and the accompanying manuscript (in preparation)."
+title: "Cis-GS: Cis-regulatory Element Genome Scanner"
+version: "1.1.0"
+date-released: "2026-05-21"
 authors:
   - family-names: Mallick
     given-names: Ayushman
+    email: ayushmania2002@gmail.com
     orcid: https://orcid.org/0009-0004-5774-450X
-repository-code: https://github.com/Ayushmania2002/CYC-re-Genome-Scanning
-url: https://github.com/Ayushmania2002/CYC-re-Genome-Scanning
+    affiliation: "Plant Signaling Lab, IISER Tirupati"
+type: software
+repository-code: https://github.com/Ayushmania2002/Cis-GS
+url: https://Ayushmania2002.github.io/Cis-GS/
 license: MIT
 keywords:
-  - cis-regulatory elements
-  - position weight matrix
-  - coexpression network
-  - CYCLOPS
-  - plant genomics
-  - transcriptomics
-  - systems biology
+  - bioinformatics
+  - cis-regulatory-elements
+  - promoter-analysis
+  - motif-discovery
+  - transcription-factor
+  - TFBS
+  - gene-expression
+  - co-expression
+  - KEGG
+  - PlantTFDB
+  - AnimalTFDB
 abstract: >
-  This repository contains the complete computational pipeline used for
-  genome-wide cis-regulatory element discovery, PWM-based motif analysis,
-  transcriptomic filtering, and coexpression network construction to identify
-  genes associated with the CYCLOPS transcriptional regulator.
+  Cis-GS is a whole-genome pipeline for cis-regulatory element discovery,
+  expression coupling, and KEGG functional enrichment, distributed as a
+  PyQt5 desktop GUI and an interactive command-line tool. It bundles
+  live PlantTFDB / AnimalTFDB / JASPAR / HOCOMOCO motif importers, a
+  three-method gene-ID resolver, a co-expression module detector, and
+  REST-backed KEGG over-representation analysis for any of 11,700+
+  organisms - all in one installable Python package (`pip install cis-gs`).

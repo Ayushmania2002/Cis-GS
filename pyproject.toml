@@ -1,68 +1,104 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "Cis-GS"
-version = "1.0.0"
-description = "Cis-regulatory Element Genome Scanner — analyze cis-regulatory elements across genomes"
+name = "cis-gs"
+version = "1.1.0"
+description = "Cis-regulatory Element Genome Scanner - whole-genome cis-element discovery, expression coupling, and KEGG enrichment in one PyQt5 + CLI pipeline."
 readme = "README.md"
-license = "MIT"
-requires-python = ">=3.8"
+license = { text = "MIT" }
+requires-python = ">=3.9"
 authors = [
-    {name = "Ayushman Mallick"},
-    {name = "Plant Signaling Lab, IISER Tirupati"},
+    { name = "Ayushman Mallick", email = "ayushmania2002@gmail.com" },
+    { name = "Plant Signaling Lab, IISER Tirupati" },
+]
+maintainers = [
+    { name = "Ayushman Mallick", email = "ayushmania2002@gmail.com" },
 ]
 keywords = [
-    "bioinformatics", "genomics", "cis-regulatory", "promoter",
-    "motif", "transcription-factor", "TFBS", "gene-expression",
-    "co-expression", "WGCNA", "PlantTFDB", "JASPAR"
+    "bioinformatics", "genomics", "cis-regulatory-elements", "promoter-analysis",
+    "motif-discovery", "transcription-factor", "TFBS", "gene-expression",
+    "co-expression", "WGCNA", "KEGG", "enrichment", "PlantTFDB",
+    "AnimalTFDB", "JASPAR", "HOCOMOCO",
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Operating System :: OS Independent",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
     "Environment :: X11 Applications :: Qt",
+    "Environment :: Console",
 ]
 dependencies = [
-    "PyQt5>=5.15.0",
-    "numpy>=1.21.0",
-    "pandas>=1.3.0",
-    "matplotlib>=3.3.0",
-    "seaborn>=0.11.0",
+    "PyQt5>=5.15",
+    "numpy>=1.23",
+    "pandas>=1.5",
+    "scipy>=1.9",
+    "scikit-learn>=1.1",
+    "matplotlib>=3.6",
+    "seaborn>=0.12",
+    "matplotlib-venn>=0.11",
     "biopython>=1.79",
-    "scikit-learn>=1.0.0",
-    "scipy>=1.7.0",
+    "bcbio-gff>=0.6",
     "logomaker>=0.8",
-    "Pillow>=9.0.0",
-    "python-louvain>=0.15",
-    "networkx>=2.6",
+    "networkx>=3.0",
+    "python-louvain>=0.16",
+    "Pillow>=9.0",
+    "requests>=2.28",
+    "tqdm>=4.64",
+    "PyMuPDF>=1.22",
 ]
 
 [project.optional-dependencies]
-dev = ["pyinstaller>=5.0", "build", "twine"]
+dev   = ["pyinstaller>=6.0", "build", "twine", "pytest>=7.0"]
+docs  = ["sphinx>=7.0", "sphinx-rtd-theme>=2.0", "myst-parser>=2.0", "sphinx-copybutton>=0.5"]
 
 [project.urls]
-Homepage = "https://github.com/Ayushmania2002/Cis-GS"
+Homepage      = "https://github.com/Ayushmania2002/Cis-GS"
 Documentation = "https://Ayushmania2002.github.io/Cis-GS/"
-"Bug Tracker" = "https://github.com/Ayushmania2002/Cis-GS/issues"
-"Source Code" = "https://github.com/Ayushmania2002/Cis-GS"
+Repository    = "https://github.com/Ayushmania2002/Cis-GS"
+Issues        = "https://github.com/Ayushmania2002/Cis-GS/issues"
+Changelog     = "https://github.com/Ayushmania2002/Cis-GS/releases"
 
+# Entry points
+#   cis-gs       -> interactive CLI (with wizard + per-step commands)
+#   cis-gs-gui   -> launches the PyQt5 GUI (app_v4_open.py)
 [project.scripts]
 cis-gs = "cis_gs.cli:main"
 
 [project.gui-scripts]
-cis-gs-gui = "cis_gs.app:main"
+cis-gs-gui = "app_v4_open:main"
+
+# Packaging layout
+#   cis_gs/                        - import package (CLI + enrichment + importers)
+#   app_v4_open.py + 3 root .py    - top-level modules shipped alongside
+[tool.setuptools]
+py-modules = [
+    "app_v4_open",
+    "chromosome_utils",
+    "planttfdb_importer",
+    "animaltfdb_importer",
+]
 
 [tool.setuptools.packages.find]
 include = ["cis_gs*"]
+exclude = ["tests*", "docs*", "build*", "dist*", "venv*", "notebooks*"]
 
 [tool.setuptools.package-data]
 cis_gs = ["assets/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"

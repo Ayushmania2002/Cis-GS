@@ -20,6 +20,16 @@ Transcription factor database commands:
     cis-gs tfdb sources                     List JASPAR / HOCOMOCO datasets
     cis-gs tfdb download-db <source_id>     Download JASPAR / HOCOMOCO
     cis-gs tfdb filter <meme_file>          Filter & export motifs to a text file
+
+Enrichment + ID-conversion commands:
+    cis-gs enrich-go        -g genes.txt --gaf … --obo go.obo
+                              GO over-representation (BP/CC/MF)
+    cis-gs enrich-kegg      -g genes.txt --organism ath
+                              KEGG pathway enrichment via KEGG REST
+    cis-gs id-convert       -g ids.txt --species human
+                              Auto-detect & translate gene IDs
+    cis-gs fetch-expression --geo GSE16997 -o expr.csv
+                              Public RNA-seq matrix (GEO/Atlas/Ensembl Plants)
 """
 
 import argparse
@@ -129,7 +139,7 @@ def cmd_gui(args):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# FETCH  —  download genome from NCBI
+# FETCH  -  download genome from NCBI
 # ══════════════════════════════════════════════════════════════════════════════
 
 def cmd_fetch(args):
@@ -169,14 +179,14 @@ def cmd_fetch(args):
         print(f"\n  ERROR: {message}")
         # Tip: Make sure the accession is correct (e.g. GCF_000001735.4 not GCF_000001735)
         # Tip: You need an internet connection to access NCBI FTP
-        # Tip: NCBI sometimes times out — wait a moment and try again
+        # Tip: NCBI sometimes times out - wait a moment and try again
         # Tip: Run 'cis-gs fetch --help' to see all options
         sys.exit(1)
     print(f"  {message}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# EXTRACT  —  extract promoter sequences
+# EXTRACT  -  extract promoter sequences
 # ══════════════════════════════════════════════════════════════════════════════
 
 def cmd_extract(args):
@@ -209,7 +219,7 @@ def cmd_extract(args):
     except Exception as e:
         print(f"\n  ERROR during extraction: {e}")
         # Tip: Make sure your GFF3 file uses the same chromosome names as the FASTA
-        # Tip: Some GFF3 files use 'Chr1' while FASTA uses '1' — they must match
+        # Tip: Some GFF3 files use 'Chr1' while FASTA uses '1' - they must match
         # Tip: Run 'cis-gs extract --help' for all available options
         sys.exit(1)
 
@@ -219,7 +229,7 @@ def cmd_extract(args):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SEARCH  —  scan promoters for TFBS motif hits
+# SEARCH  -  scan promoters for TFBS motif hits
 # ══════════════════════════════════════════════════════════════════════════════
 
 def cmd_search(args):
@@ -298,13 +308,13 @@ def cmd_search(args):
         print(f"\n  Next step: cis-gs logo {output}  OR  cis-gs feed {output} expression.csv")
     else:
         print("  No hits found.")
-        # Tip: Your motif pattern may be too strict — try a shorter or more degenerate IUPAC
+        # Tip: Your motif pattern may be too strict - try a shorter or more degenerate IUPAC
         # Tip: Check that gene IDs in your FASTA headers match those in the expression file
         # Tip: Try with --no-revcomp if you only want to search the forward strand
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# LOGO  —  build sequence logos from motif hit CSV
+# LOGO  -  build sequence logos from motif hit CSV
 # ══════════════════════════════════════════════════════════════════════════════
 
 def cmd_logo(args):
@@ -376,7 +386,7 @@ def cmd_logo(args):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# FEED  —  match motif hit genes with expression data
+# FEED  -  match motif hit genes with expression data
 # ══════════════════════════════════════════════════════════════════════════════
 
 def cmd_feed(args):
@@ -452,7 +462,7 @@ def cmd_feed(args):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# COEXPR  —  co-expression network analysis
+# COEXPR  -  co-expression network analysis
 # ══════════════════════════════════════════════════════════════════════════════
 
 def cmd_coexpr(args):
@@ -510,7 +520,7 @@ def cmd_coexpr(args):
         print(f"  Heatmap PNG saved        : {heatmap_path}")
     except Exception as e:
         print(f"  WARNING: Could not render heatmap: {e}")
-        # Tip: Heatmap requires matplotlib and seaborn — run 'pip install seaborn'
+        # Tip: Heatmap requires matplotlib and seaborn - run 'pip install seaborn'
 
     # Module detection
     print(f"Detecting co-expression modules (threshold={args.threshold})...")
@@ -555,7 +565,7 @@ def cmd_coexpr(args):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# KMEANS  —  K-means temporal clustering
+# KMEANS  -  K-means temporal clustering
 # ══════════════════════════════════════════════════════════════════════════════
 
 def cmd_kmeans(args):
@@ -630,7 +640,7 @@ def cmd_kmeans(args):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TFDB  —  transcription factor database commands
+# TFDB  -  transcription factor database commands
 # ══════════════════════════════════════════════════════════════════════════════
 
 def cmd_tfdb_species(args):
@@ -651,7 +661,7 @@ def cmd_tfdb_species(args):
 
     print(f"\n  Source: {source}  ({len(catalogue)} total organisms)")
     if search:
-        print(f"  Filter: '{args.search}' — {len(entries)} match(es)\n")
+        print(f"  Filter: '{args.search}' - {len(entries)} match(es)\n")
     else:
         print(f"  Showing all {len(entries)} species\n")
 
@@ -708,7 +718,7 @@ def cmd_tfdb_download(args):
                 meme_gz_dest.unlink()
             except Exception as e:
                 print(f"\n  ERROR: Downloaded but failed to decompress: {e}")
-                # Tip: The downloaded file may be corrupted — try again with --force
+                # Tip: The downloaded file may be corrupted - try again with --force
                 sys.exit(1)
         else:
             ok, err2 = _try_urls(meme_urls, meme_dest, label="MEME")
@@ -716,7 +726,7 @@ def cmd_tfdb_download(args):
                 print(f"\n  ERROR: Could not download MEME file for '{code}'")
                 print(f"  URLs tried:\n{err}\n{err2}")
                 # Tip: Verify the species code with: cis-gs tfdb species --search <name>
-                # Tip: The PlantTFDB server may be temporarily down — try again in a few minutes
+                # Tip: The PlantTFDB server may be temporarily down - try again in a few minutes
                 # Tip: Download manually from planttfdb.gao-lab.org and use 'cis-gs tfdb filter'
                 sys.exit(1)
 
@@ -773,7 +783,7 @@ def cmd_tfdb_download_db(args):
     if ds is None:
         print(f"\n  ERROR: Unknown source ID: '{sid}'")
         print("  Run 'cis-gs tfdb sources' to see available IDs.")
-        # Tip: Source IDs are case-sensitive — use exactly as shown in 'cis-gs tfdb sources'
+        # Tip: Source IDs are case-sensitive - use exactly as shown in 'cis-gs tfdb sources'
         sys.exit(1)
 
     outdir = Path(args.outdir)
@@ -808,7 +818,7 @@ def cmd_tfdb_download_db(args):
                 tmp.unlink()
             except Exception as e:
                 print(f"\n  ERROR extracting ZIP: {e}")
-                # Tip: The downloaded file may be corrupted — delete and retry with --force
+                # Tip: The downloaded file may be corrupted - delete and retry with --force
                 sys.exit(1)
         else:
             ok, err = _try_urls(ds["urls"], dest, label=ds["id"])
@@ -831,7 +841,7 @@ def cmd_tfdb_download_db(args):
             if ok:
                 print(f"  Saved annotation : {annot_dest}")
             else:
-                print(f"  WARNING: Annotation file unavailable — TF Family will show Unknown")
+                print(f"  WARNING: Annotation file unavailable - TF Family will show Unknown")
                 annot_dest = None
 
     print(f"\n  To browse and export motifs from this dataset:")
@@ -878,7 +888,7 @@ def cmd_tfdb_filter(args):
     if args.info:
         info_path = Path(args.info)
         if not info_path.exists():
-            print(f"  WARNING: Info file not found: {info_path} — skipping annotation")
+            print(f"  WARNING: Info file not found: {info_path} - skipping annotation")
             # Tip: Download the info file alongside the MEME file:
             #   cis-gs tfdb download Ath  (downloads both MEME + info automatically)
         else:
@@ -936,7 +946,7 @@ def cmd_tfdb_filter(args):
 
     if not filtered:
         print("\n  WARNING: No motifs passed the filters.")
-        # Tip: Relax your filters — try without --family or --species first
+        # Tip: Relax your filters - try without --family or --species first
         # Tip: Run 'cis-gs tfdb filter <meme_file> --list-families' to see available families
         # Tip: Family names are case-insensitive partial matches (e.g. --family myb matches MYB)
         if args.list_families or args.list_species:
@@ -1003,9 +1013,28 @@ def _build_parser():
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
-            "━━━  TYPICAL WORKFLOW  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            "===  INTERACTIVE WIZARD  =============================================\n"
             "\n"
-            "  Step 0 — Get TF motifs (choose one database):\n"
+            "  Don't remember the flags?  Use the step-by-step wizard:\n"
+            "    cis-gs wizard               # top-level menu, pick a workflow\n"
+            "    cis-gs wizard kegg          # KEGG enrichment, live organism picker\n"
+            "    cis-gs wizard id-convert    # ID conversion, live NCBI Taxonomy\n"
+            "    cis-gs wizard feed          # Expression Feeding\n"
+            "    cis-gs wizard coexpr        # Co-expression network\n"
+            "    cis-gs wizard kmeans        # K-means clustering\n"
+            "    cis-gs wizard fetch         # NCBI genome fetch\n"
+            "    cis-gs wizard extract       # Promoter extraction\n"
+            "    cis-gs wizard search        # Motif search\n"
+            "\n"
+            "  Every regular subcommand also accepts -i / --interactive to\n"
+            "  promote it into a wizard:\n"
+            "    cis-gs enrich-kegg -i\n"
+            "    cis-gs id-convert -i\n"
+            "    cis-gs coexpr -i\n"
+            "\n"
+            "===  TYPICAL WORKFLOW  ===============================================\n"
+            "\n"
+            "  Step 0 -- Get TF motifs (choose one database):\n"
             "    cis-gs tfdb species --search arabidopsis   # find species code\n"
             "    cis-gs tfdb download Ath -o ./motif_db     # download PlantTFDB\n"
             "    cis-gs tfdb sources                        # list JASPAR/HOCOMOCO\n"
@@ -1013,33 +1042,41 @@ def _build_parser():
             "    cis-gs tfdb filter ./motif_db/Ath_TF_binding_motifs.meme \\\n"
             "           --family MYB -o myb_motifs.txt      # export chosen motifs\n"
             "\n"
-            "  Step 1 — Download genome from NCBI:\n"
+            "  Step 1 -- Download genome from NCBI:\n"
             "    cis-gs fetch GCF_000001735.4 -o ./genome\n"
             "\n"
-            "  Step 2 — Extract upstream promoter sequences:\n"
+            "  Step 2 -- Extract upstream promoter sequences (PROMOTERS):\n"
             "    cis-gs extract genome.fasta genome.gff3 -l 1500 -o promoters.fasta\n"
             "\n"
-            "  Step 3 — Scan promoters for TFBS motif hits:\n"
+            "  Step 3 -- Scan promoters for TFBS motif hits (MOTIF SEARCH):\n"
             "    cis-gs search promoters.fasta --motifs-file myb_motifs.txt\n"
             "    cis-gs search promoters.fasta -m ACGTG -m RGATCY   # inline motifs\n"
             "\n"
-            "  Step 4 — Build sequence logos from hits:\n"
+            "  Step 3b -- Build sequence logos from the hits (MOTIF LOGOS):\n"
             "    cis-gs logo motif_hits.csv -o ./logos\n"
             "\n"
-            "  Step 5 — Match hits with gene expression data:\n"
+            "  Step 4 -- Match motif hits with expression data (EXPRESSION FEEDING):\n"
             "    cis-gs feed motif_hits.csv expression.csv -o filtered_expr.csv\n"
+            "    cis-gs feed -i                              # interactive wizard\n"
             "\n"
-            "  Step 6a — Co-expression network:\n"
+            "  Step 5 -- Co-expression network analysis (COEXPRESSION):\n"
             "    cis-gs coexpr filtered_expr.csv -o ./coexpr_results\n"
             "\n"
-            "  Step 6b — K-means temporal clustering:\n"
+            "  Step 6 -- K-means temporal clustering (K-MEANS):\n"
             "    cis-gs kmeans filtered_expr.csv -k 6 -o ./kmeans_results\n"
             "\n"
-            "━━━  COMMON OPTIONS  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            "  Step 7 -- KEGG pathway enrichment (KEGG ENRICHMENT):\n"
+            "    cis-gs id-convert -g motif_hits.csv --species 3818 -o id_map.tsv\n"
+            "    cis-gs enrich-kegg -g id_map.tsv --organism ahf -o kegg.csv\n"
+            "    cis-gs wizard kegg                          # interactive\n"
+            "\n"
+            "===  COMMON OPTIONS  =================================================\n"
             "  Use --help on any subcommand for full details:\n"
             "    cis-gs fetch --help\n"
             "    cis-gs tfdb --help\n"
-            "    cis-gs tfdb filter --help\n"
+            "    cis-gs enrich-kegg --help\n"
+            "    cis-gs id-convert --help\n"
+            "    cis-gs wizard --help\n"
         ),
     )
 
@@ -1061,12 +1098,12 @@ def _build_parser():
             "  cis-gs fetch GCF_001433935.1 --no-fasta      # GFF3 only\n"
             "\n"
             "Output files:\n"
-            "  <assembly_id>_genomic.fasta   — genome sequences\n"
-            "  <assembly_id>_genomic.gff3    — gene annotations\n"
+            "  <assembly_id>_genomic.fasta   - genome sequences\n"
+            "  <assembly_id>_genomic.gff3    - gene annotations\n"
             "\n"
             "Common errors:\n"
-            "  'Assembly not found' — double-check the accession at ncbi.nlm.nih.gov/assembly\n"
-            "  Timeout — NCBI FTP can be slow; try again or download manually\n"
+            "  'Assembly not found' - double-check the accession at ncbi.nlm.nih.gov/assembly\n"
+            "  Timeout - NCBI FTP can be slow; try again or download manually\n"
         ),
     )
     p.add_argument("assembly", help="NCBI assembly accession (e.g. GCF_000001735.4)")
@@ -1091,11 +1128,11 @@ def _build_parser():
             "  cis-gs extract genome.fasta annotation.gff3 -l 2000 -o promoters_2kb.fasta\n"
             "\n"
             "Output files:\n"
-            "  promoters.fasta   — promoter sequences in FASTA format\n"
-            "  promoters.tsv     — table of gene IDs, coordinates, strand\n"
+            "  promoters.fasta   - promoter sequences in FASTA format\n"
+            "  promoters.tsv     - table of gene IDs, coordinates, strand\n"
             "\n"
             "Common errors:\n"
-            "  'Chromosome not found' — FASTA and GFF3 use different chromosome names\n"
+            "  'Chromosome not found' - FASTA and GFF3 use different chromosome names\n"
             "  Solution: Check that chr names match (e.g. 'Chr1' in GFF vs '1' in FASTA)\n"
         ),
     )
@@ -1127,7 +1164,7 @@ def _build_parser():
             "  cis-gs search promoters.fasta --motifs-file myb_motifs.txt\n"
             "  cis-gs search promoters.fasta --motifs-file motifs.txt --no-revcomp\n"
             "\n"
-            "Motifs file format (NAME<TAB>IUPAC — one per line):\n"
+            "Motifs file format (NAME<TAB>IUPAC - one per line):\n"
             "  ERF|AT1G00010  GCAGCCGCC\n"
             "  MYB|AT1G00020  AACCGTTA\n"
             "  # Lines starting with # are comments\n"
@@ -1142,13 +1179,13 @@ def _build_parser():
     )
     p.add_argument("fasta", help="Promoter FASTA file (from 'cis-gs extract')")
     p.add_argument("-m", "--motif", action="append", metavar="PATTERN",
-                   help="IUPAC motif pattern — repeatable (e.g. -m ACGTG -m RGATCY)")
+                   help="IUPAC motif pattern - repeatable (e.g. -m ACGTG -m RGATCY)")
     p.add_argument("--motifs-file", metavar="FILE",
                    help="File with motifs, one per line: NAME<TAB>IUPAC_PATTERN")
     p.add_argument("-o", "--output", default="motif_hits.csv", metavar="FILE",
                    help="Output hits CSV (default: motif_hits.csv)")
     p.add_argument("--no-iupac", action="store_true",
-                   help="Disable IUPAC expansion — treat patterns as literal strings")
+                   help="Disable IUPAC expansion - treat patterns as literal strings")
     p.add_argument("--no-revcomp", action="store_true",
                    help="Only search the forward strand (default: both strands)")
     p.set_defaults(func=cmd_search)
@@ -1170,7 +1207,7 @@ def _build_parser():
             "  cis-gs logo motif_hits.csv --length 9   # only 9-mer sequences\n"
             "\n"
             "Output:\n"
-            "  logos/logo_<motif_name>.png   — one file per motif\n"
+            "  logos/logo_<motif_name>.png   - one file per motif\n"
         ),
     )
     p.add_argument("hits_csv", help="Motif hits CSV from 'cis-gs search'")
@@ -1229,16 +1266,16 @@ def _build_parser():
             "  cis-gs coexpr filtered_expr.csv --threshold 0.8 --hide-isolated\n"
             "\n"
             "Output files:\n"
-            "  correlation_matrix.csv       — pairwise correlation values\n"
-            "  correlation_heatmap.png      — heatmap image\n"
-            "  module_membership.csv        — gene → module assignment\n"
-            "  coexpression_network.html    — interactive network (open in browser)\n"
-            "  coexpression_network.png     — static network image\n"
+            "  correlation_matrix.csv       - pairwise correlation values\n"
+            "  correlation_heatmap.png      - heatmap image\n"
+            "  module_membership.csv        - gene → module assignment\n"
+            "  coexpression_network.html    - interactive network (open in browser)\n"
+            "  coexpression_network.png     - static network image\n"
             "\n"
             "Threshold guide:\n"
-            "  0.7 (default) — moderate co-expression\n"
-            "  0.8           — strong co-expression, fewer edges\n"
-            "  0.5           — permissive, more edges and larger modules\n"
+            "  0.7 (default) - moderate co-expression\n"
+            "  0.8           - strong co-expression, fewer edges\n"
+            "  0.5           - permissive, more edges and larger modules\n"
         ),
     )
     p.add_argument("expr_csv", help="Expression CSV (genes × samples)")
@@ -1268,9 +1305,9 @@ def _build_parser():
             "  cis-gs kmeans filtered_expr.csv -k 8 -o ./clusters\n"
             "\n"
             "Output files:\n"
-            "  kmeans_clusters.csv    — gene → cluster assignment\n"
-            "  kmeans_centroids.csv   — mean expression profile per cluster\n"
-            "  kmeans_plot.png        — spaghetti plot of expression trajectories\n"
+            "  kmeans_clusters.csv    - gene → cluster assignment\n"
+            "  kmeans_centroids.csv   - mean expression profile per cluster\n"
+            "  kmeans_plot.png        - spaghetti plot of expression trajectories\n"
             "\n"
             "Choosing K:\n"
             "  A common starting point is K = sqrt(number_of_genes).\n"
@@ -1291,9 +1328,9 @@ def _build_parser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=(
             "Browse and download TF binding motifs from:\n"
-            "  • PlantTFDB  — 157+ plant species\n"
-            "  • JASPAR 2024 — Vertebrates and Insects\n"
-            "  • HOCOMOCO v11 — Human and Mouse (ChIP-Seq)\n"
+            "  • PlantTFDB  - 157+ plant species\n"
+            "  • JASPAR 2024 - Vertebrates and Insects\n"
+            "  • HOCOMOCO v11 - Human and Mouse (ChIP-Seq)\n"
         ),
         epilog=(
             "Subcommands:\n"
@@ -1357,8 +1394,8 @@ def _build_parser():
             "  cis-gs tfdb download Zma -o ./db --force   # Zea mays (re-download)\n"
             "\n"
             "Output files:\n"
-            "  <code>_TF_binding_motifs.meme             — motif file\n"
-            "  <code>_TF_binding_motifs_information.txt  — annotation (family, method)\n"
+            "  <code>_TF_binding_motifs.meme             - motif file\n"
+            "  <code>_TF_binding_motifs_information.txt  - annotation (family, method)\n"
         ),
     )
     p.add_argument("code", help="3-letter PlantTFDB species code (e.g. Ath, Osa, Gma)")
@@ -1443,15 +1480,15 @@ def _build_parser():
             "  cis-gs tfdb filter JASPAR2024_CORE_vertebrates_non-redundant.meme \\\n"
             "         --species 'Homo sapiens' -o human_motifs.txt\n"
             "\n"
-            "  # Export short (6–10 bp) high-confidence motifs\n"
+            "  # Export short (6-10 bp) high-confidence motifs\n"
             "  cis-gs tfdb filter Ath_TF_binding_motifs.meme \\\n"
             "         --min-width 6 --max-width 10 --threshold 0.30 -o short_motifs.txt\n"
             "\n"
             "IUPAC threshold guide:\n"
-            "  0.20 — very relaxed (more degenerate consensus, shorter effective motif)\n"
-            "  0.25 — default (balanced)\n"
-            "  0.30 — strict (more specific, fewer IUPAC codes)\n"
-            "  0.40 — very strict (nearly exact consensus)\n"
+            "  0.20 - very relaxed (more degenerate consensus, shorter effective motif)\n"
+            "  0.25 - default (balanced)\n"
+            "  0.30 - strict (more specific, fewer IUPAC codes)\n"
+            "  0.40 - very strict (nearly exact consensus)\n"
             "\n"
             "Output format (NAME<TAB>IUPAC per line):\n"
             "  MYB|AT1G00010  AACCGTTA\n"
@@ -1474,7 +1511,7 @@ def _build_parser():
     p.add_argument("--max-width", type=int, default=None, metavar="N",
                    help="Maximum motif width in bp (e.g. --max-width 20)")
     p.add_argument("--threshold", type=float, default=0.25, metavar="F",
-                   help="IUPAC consensus threshold 0.0–1.0 (default: 0.25)")
+                   help="IUPAC consensus threshold 0.0-1.0 (default: 0.25)")
     p.add_argument("--no-prefix", action="store_true",
                    help="Don't prefix motif names with TF family (default: 'MYB|AT1G00010')")
     p.add_argument("-o", "--output", default="motifs.txt", metavar="FILE",
@@ -1485,16 +1522,312 @@ def _build_parser():
                    help="List all species in this MEME file and exit")
     p.set_defaults(func=cmd_tfdb_filter)
 
+    # ── enrichment sub-commands ──────────────────────────────────────────
+    # KEGG enrichment, gene-ID conversion.  See cis_gs/cli_enrichment.py.
+    try:
+        from cis_gs.cli_enrichment import register as _register_enrichment_cmds
+        _register_enrichment_cmds(sub)
+    except ImportError as _exc:
+        print(f"  (enrichment commands disabled: {_exc})", file=sys.stderr)
+
+    # ── wizard / interactive menu ────────────────────────────────────────
+    wiz = sub.add_parser(
+        "wizard",
+        help="Run an interactive step-by-step wizard for any workflow",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=(
+            "Cis-GS Interactive Wizard\n"
+            "==========================\n"
+            "Launches a step-by-step assistant that mirrors every GUI tab.\n"
+            "Each prompt explains what the value means and provides sensible\n"
+            "defaults that you can accept by pressing Enter.\n\n"
+            "Pick the workflow on the command line, or run 'cis-gs wizard'\n"
+            "with no topic for the top-level menu.\n"
+        ),
+        epilog=(
+            "TOPICS:\n"
+            "  cis-gs wizard               # top-level menu\n"
+            "  cis-gs wizard kegg          # KEGG enrichment  (live organism picker)\n"
+            "  cis-gs wizard id-convert    # ID conversion    (NCBI taxonomy picker)\n"
+            "  cis-gs wizard feed          # Expression Feeding\n"
+            "  cis-gs wizard coexpr        # Co-expression network\n"
+            "  cis-gs wizard kmeans        # K-means clustering\n"
+            "  cis-gs wizard fetch         # NCBI genome fetch\n"
+            "  cis-gs wizard extract       # Promoter extraction\n"
+            "  cis-gs wizard search        # Motif search\n\n"
+            "EXAMPLES:\n"
+            "  $ cis-gs wizard kegg\n"
+            "    [Step 1/5] KEGG organism\n"
+            "      organism: arachis\n"
+            "      3 match(es) for 'arachis':\n"
+            "        1.  ahf       Arachis hypogaea (peanut)            [Plants]\n"
+            "        2.  adu       Arachis duranensis                   [Plants]\n"
+            "        3.  aip       Arachis ipaensis                     [Plants]\n"
+            "      Pick a number: 1\n"
+            "      OK  Using KEGG organism code: ahf\n"
+            "    [Step 2/5] Query gene list\n"
+            "      ...\n"
+        ),
+    )
+    wiz.add_argument(
+        "wizard_topic", nargs="?",
+        choices=["menu", "kegg", "id", "id-convert", "feed", "coexpr",
+                 "kmeans", "fetch", "extract", "search"],
+        help="Wizard to launch (omit for the top-level menu).",
+    )
+    wiz.set_defaults(func=lambda args: None)  # main() handles dispatch
+
+    # ── -i / --interactive on existing commands ─────────────────────────
+    # Walk through every parser we just registered and add a uniform
+    # --interactive flag so users can promote any command into a wizard.
+    for action in sub._name_parser_map.values():
+        if action.prog.endswith("wizard"):
+            continue
+        try:
+            action.add_argument(
+                "-i", "--interactive", action="store_true",
+                help="Run this command as an interactive wizard (prompts you "
+                     "for every value step-by-step instead of using flags).",
+            )
+        except argparse.ArgumentError:
+            pass  # already added
+
     return parser
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BANNER
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _print_banner():
+    """Animated Cis-GS header.  Only fires in interactive TTY sessions
+    so piped / scripted output stays clean.
+
+    Phase 1 - Slim Nessie slithers across a 5-row sine-wave canvas.
+              Body chars (/ \\ ~) are chosen per-column so they connect
+              into proper S-curves as the snake slides from right to left.
+    Phase 2 - Full banner reveals line-by-line (curtain-drop effect).
+    """
+    if not sys.stdout.isatty():
+        return
+    try:
+        import time, math
+
+        T  = "\033[36m"   # teal  (brand colour)
+        B  = "\033[1m"    # bold
+        D  = "\033[2m"    # dim
+        R  = "\033[0m"    # reset
+        CL = "\033[K"     # clear to end of line
+
+        ROWS     = 5      # animation canvas height
+        W        = 74     # canvas width (cols)
+        AMP      = 1.8    # sine amplitude (rows from centre row)
+        FREQ     = 0.45   # sine frequency (rad/col) → ~14-col S-curve period
+        BODY_LEN = 24     # body chars trailing behind the head
+        SPEED    = 3      # cols per frame  (total ≈ 1.1 s)
+
+        def row_at(x):
+            """Sine-wave row for column x, clamped to 0 … ROWS-1."""
+            return max(0, min(ROWS - 1,
+                round((ROWS - 1) / 2 + AMP * math.sin(x * FREQ))))
+
+        def body_ch(x):
+            """Direction char connecting column x toward the head (x-1).
+            /  → head-side is a row higher (snake curves up-left)
+            \\  → head-side is a row lower  (snake curves down-left)
+            ~  → same row (horizontal run)
+            """
+            y0, y1 = row_at(x), row_at(x - 1)
+            return '/' if y1 < y0 else ('\\' if y1 > y0 else '~')
+
+        # Reserve ROWS terminal rows for the animation canvas
+        sys.stdout.write("\n" * ROWS)
+        UP = f"\033[{ROWS}A"
+        sys.stdout.flush()
+
+        blink = False
+        for hx in range(W + BODY_LEN, -(BODY_LEN // 2 + 5), -SPEED):
+            hy = row_at(hx)
+            canvas = [[' '] * W for _ in range(ROWS)]
+
+            # body: chars hx+1 … hx+BODY_LEN (trailing to the right of head)
+            for i in range(1, BODY_LEN + 1):
+                bx = hx + i
+                by = row_at(bx)
+                if 0 <= bx < W:
+                    canvas[by][bx] = body_ch(bx)
+
+            # head: single char, blinks @ / 0  (round Nessie eye)
+            if 0 <= hx < W:
+                canvas[hy][hx] = '0' if blink else '@'
+
+            sys.stdout.write(UP)
+            for row in canvas:
+                sys.stdout.write(f"\r{T}{B}{''.join(row)}{R}{CL}\n")
+            sys.stdout.flush()
+            time.sleep(0.028)
+            blink = not blink
+
+        # Clear animation canvas
+        sys.stdout.write(UP)
+        for _ in range(ROWS):
+            sys.stdout.write(f"\r{CL}\n")
+        sys.stdout.flush()
+
+        # ── Phase 2 : banner drops in line by line ──────────────────────────
+        #
+        # Layout (74 cols wide):
+        #   Lines 1-6  : "Cis-GS" block text
+        #   Lines 7-11 : Nessie head ──── DNA double helix ──── magnifying glass
+        #
+        #   DNA helix = two interlocked strands:
+        #     top  (line 8) : \/\/\/  (29 × "\/" = 58 chars)
+        #     bot  (line 9) : /\/\/\  (29 × "/\" = 58 chars)
+        #   The two rows together create the classic X-crossing helix.
+        #
+        # LARGE Cis-GS text (left, in bordered box) + ASCII art DNA (right)
+        _text_left = [
+            "╔═══════════════════════════════════════════════╗",
+            "║                                               ║",
+            "║   ██████╗ ██╗███████╗      ██████╗ ███████╗  ║",
+            "║  ██╔════╝ ██║██╔════╝     ██╔════╝ ██╔════╝  ║",
+            "║  ██║      ██║███████╗     ██║  ███╗███████╗  ║",
+            "║  ██║      ██║╚════██║     ██║   ██║╚════██║  ║",
+            "║  ╚██████╗ ██║███████║     ╚██████╔╝███████║  ║",
+            "║   ╚═════╝ ╚═╝╚══════╝      ╚═════╝ ╚══════╝  ║",
+            "║                                               ║",
+            "║  Cis-regulatory Element Genome Scanner       ║",
+            "║                                               ║",
+            "╚═══════════════════════════════════════════════╝",
+        ]
+        _art_right = [
+            "                                                                                    ",
+            "    ██████████████                        ███                        ██████████████  ",
+            "    █████████████████               ██████████████               ██████████████████  ",
+            "              █████████           ███████████████████          █████████             ",
+            "                  ███████       ███████         ███████       ██████                 ",
+            "      █             ██████     ██████             ██████    ██████              █    ",
+            "      █    █    █     █████  ██████   ██   █        ██ ██  ██████     █    █    █    ",
+            "      █    █    ██     ███████████    ██   █    ██   ███████████      █    █    █    ",
+            "      █    █    ██      █████████     ██   █    ██    ████████        █    █    █    ",
+            "      █    █    ██       █ ██ █       ██   █    ██     ██████         █    █    █    ",
+            "      █    █    ██       ███████      ██   █    ██     ██████         █    █    █    ",
+            "      █    █    ██      █████ ███     ██   █    ██    ████ ████       █    █    █    ",
+            "      █    █    ██     ███████████    ██   █    ██   ███████████      █    █    █    ",
+            "      █    █          █████  ██████   ██   █        █████  ██████          █    █    ",
+            "      █             ██████     ██████             ██████    ██████                   ",
+            "                  ███████       ████████       ███████        ██████                 ",
+            "               ████████           ███████████████████          █████████             ",
+            "    █████████████████               ██████████████                █████████████████  ",
+            "    ██████████████                                                   ██████████████  ",
+            "                                                                                     ",
+        ]
+        # Pad text left to match art right height (20 lines)
+        while len(_text_left) < len(_art_right):
+            _text_left.append("║                                               ║")
+
+        banner = [
+            _text_left[i] + "  " + _art_right[i]
+            for i in range(len(_art_right))
+        ]
+
+        sys.stdout.write("\n")
+        for line in banner:
+            sys.stdout.write(f"{T}{B}{line}{R}\n")
+            sys.stdout.flush()
+            time.sleep(0.065)
+
+        sys.stdout.write(
+            f"\n{D}  Cis-regulatory Element Genome Scanner"
+            f"  ·  v1.0.0"
+            f"  ·  Plant Signaling Lab, IISER Tirupati{R}\n\n"
+        )
+        sys.stdout.flush()
+
+    except Exception:
+        pass
 
 
 # ══════════════════════════════════════════════════════════════════════════════
 # ENTRY POINT
 # ══════════════════════════════════════════════════════════════════════════════
 
+def _all_subcommands(parser):
+    """Walk argparse subparser tree to collect every valid subcommand."""
+    out: list[str] = []
+    for action in parser._actions:
+        if hasattr(action, "choices") and action.choices:
+            for name, sub in action.choices.items():
+                out.append(name)
+    return out
+
+
+def _maybe_suggest_typo(argv):
+    """If the first positional looks like a typo'd subcommand, suggest fixes.
+
+    argparse exits with code 2 and an unhelpful 'invalid choice' on typos.
+    We catch that case proactively before parse_args is called.
+    """
+    if len(argv) < 1:
+        return
+    first = argv[0]
+    if first.startswith("-"):
+        return
+    p = _build_parser()
+    valid = _all_subcommands(p)
+    if first in valid:
+        return
+    try:
+        from cis_gs.cli_interactive import did_you_mean, RED, GREEN, BOLD, RST, YEL
+    except Exception:
+        return
+    matches = did_you_mean(first, valid, n=4, cutoff=0.5)
+    if not matches:
+        return
+    print(f"\n{RED}{BOLD}Unknown command: {first!r}{RST}", file=sys.stderr)
+    print(f"{YEL}Did you mean one of these?{RST}", file=sys.stderr)
+    for m in matches:
+        print(f"  {GREEN}cis-gs {m}{RST}", file=sys.stderr)
+    print(f"\nRun {BOLD}cis-gs --help{RST} for the full command list, or "
+          f"{BOLD}cis-gs wizard{RST} to launch the interactive menu.\n",
+          file=sys.stderr)
+
+
 def main():
+    _print_banner()
+
+    # ---- did-you-mean preflight on top-level command ---------------------
+    # Skip the typo check if the user is already asking for help or a flag.
+    if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
+        _maybe_suggest_typo(sys.argv[1:])
+
     parser = _build_parser()
     args   = parser.parse_args()
+
+    # ---- 'wizard' top-level command --------------------------------------
+    if getattr(args, "command", None) == "wizard":
+        from cis_gs.cli_interactive import (
+            interactive_wizard_menu, interactive_kegg_enrichment,
+            interactive_id_convert, interactive_feed, interactive_coexpr,
+            interactive_kmeans, interactive_fetch, interactive_extract,
+            interactive_search,
+        )
+        sub = getattr(args, "wizard_topic", None)
+        dispatch = {
+            None:        interactive_wizard_menu,
+            "menu":      interactive_wizard_menu,
+            "kegg":      interactive_kegg_enrichment,
+            "id":        interactive_id_convert,
+            "id-convert": interactive_id_convert,
+            "feed":      interactive_feed,
+            "coexpr":    interactive_coexpr,
+            "kmeans":    interactive_kmeans,
+            "fetch":     interactive_fetch,
+            "extract":   interactive_extract,
+            "search":    interactive_search,
+        }
+        fn = dispatch.get(sub, interactive_wizard_menu)
+        raise SystemExit(int(fn() or 0))
 
     if args.command is None:
         # No subcommand → launch GUI
@@ -1509,6 +1842,27 @@ def main():
         else:
             args.func(args)
     else:
+        # If user passed -i / --interactive flag, route to the wizard for
+        # this command instead of running the non-interactive command.
+        if getattr(args, "interactive", False):
+            try:
+                from cis_gs import cli_interactive as ci
+            except ImportError as exc:
+                print(f"Could not load interactive module: {exc}", file=sys.stderr)
+                raise SystemExit(2)
+            iname = f"interactive_{args.command.replace('-', '_')}"
+            fn = getattr(ci, iname, None)
+            if fn is None:
+                # Special-case enrich-kegg -> kegg_enrichment
+                if args.command == "enrich-kegg":
+                    fn = ci.interactive_kegg_enrichment
+                elif args.command == "id-convert":
+                    fn = ci.interactive_id_convert
+            if fn is None:
+                print(f"No interactive wizard for command: {args.command}",
+                      file=sys.stderr)
+                raise SystemExit(2)
+            raise SystemExit(int(fn() or 0))
         args.func(args)
 
 
