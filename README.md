@@ -6,12 +6,13 @@
 
 **A whole-genome pipeline for discovering cis-regulatory elements, coupling them to expression, and finishing with KEGG enrichment — in one PyQt5 desktop app *and* one interactive CLI.**
 
-[![PyPI version](https://img.shields.io/pypi/v/cis-gs.svg?color=16A085)](https://pypi.org/project/cis-gs/)
-[![Python](https://img.shields.io/pypi/pyversions/cis-gs.svg)](https://pypi.org/project/cis-gs/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-16A085)](https://Ayushmania2002.github.io/Cis-GS/)
+[![PyPI](https://img.shields.io/pypi/v/cis-gs?logo=pypi&logoColor=white&color=16A085&label=PyPI)](https://pypi.org/project/cis-gs/)
+[![Python](https://img.shields.io/pypi/pyversions/cis-gs?logo=python&logoColor=white&color=16A085)](https://pypi.org/project/cis-gs/)
+[![Downloads](https://img.shields.io/pypi/dm/cis-gs?logo=pypi&logoColor=white&color=16A085)](https://pypi.org/project/cis-gs/)
+[![License](https://img.shields.io/badge/License-MIT-yellow?logo=opensourceinitiative&logoColor=white)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-16A085?logo=readthedocs&logoColor=white)](https://Ayushmania2002.github.io/Cis-GS/)
 [![Build](https://github.com/Ayushmania2002/Cis-GS/actions/workflows/docs.yml/badge.svg)](https://github.com/Ayushmania2002/Cis-GS/actions)
-[![DOI](https://img.shields.io/badge/DOI-pending-lightgrey)](#citation)
+[![DOI](https://img.shields.io/badge/DOI-pending-lightgrey?logo=doi&logoColor=white)](#citation)
 
 </div>
 
