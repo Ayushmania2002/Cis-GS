@@ -59,17 +59,19 @@ intersphinx_mapping = {
 # ── HTML output ─────────────────────────────────────────────────────────────
 html_theme        = "sphinx_rtd_theme"
 html_static_path  = ["_static"]
+html_css_files    = ["custom.css"]
 html_title        = f"Cis-GS {release}"
 html_short_title  = "Cis-GS"
-html_favicon      = None        # set to "_static/favicon.ico" once added
-html_logo         = None        # set to "_static/logo.png" once added
+html_favicon      = "_static/favicon.ico"
+html_logo         = "_static/logo.png"
 html_show_sourcelink = True
 html_theme_options = {
     "collapse_navigation": False,
     "navigation_depth":    3,
     "style_external_links": True,
     "prev_next_buttons_location": "both",
-    "logo_only": False,
+    "logo_only": True,             # show the logo, hide the project name twice
+    "style_nav_header_background": "#16A085",  # brand teal
 }
 html_context = {
     "display_github": True,

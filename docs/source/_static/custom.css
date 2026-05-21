@@ -1,0 +1,122 @@
+/* ─────────────────────────────────────────────────────────────────────
+   Cis-GS docs custom styling.
+   Wraps the Read-the-Docs theme with a teal accent (#16A085) and fills
+   the empty right margin with a subtle banner watermark so the page
+   reads as branded rather than blank.
+   ───────────────────────────────────────────────────────────────────── */
+
+/* ── Brand colour palette ─────────────────────────────────────────── */
+:root {
+    --cisgs-brand: #16A085;
+    --cisgs-brand-dark: #117864;
+    --cisgs-brand-light: #1ABC9C;
+    --cisgs-bg-tint: rgba(22, 160, 133, 0.04);
+}
+
+/* ── Branded page background (fills the empty right margin) ──────── */
+body {
+    background:
+        /* large soft watermark of the banner in the right margin */
+        url("banner.png") no-repeat
+        right -120px bottom -80px / 520px auto,
+        /* subtle vertical gradient behind everything */
+        linear-gradient(180deg, #f7fbfa 0%, #ffffff 240px) fixed;
+    background-attachment: fixed;
+}
+
+/* On smaller windows the watermark would crowd the content - hide it. */
+@media (max-width: 1400px) {
+    body {
+        background:
+            linear-gradient(180deg, #f7fbfa 0%, #ffffff 240px) fixed;
+    }
+}
+
+/* Keep the article column readable on top of the gradient */
+.wy-nav-content-wrap {
+    background: transparent;
+}
+
+.wy-nav-content {
+    background: #ffffff;
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.04);
+    border-radius: 4px;
+}
+
+/* ── Sidebar tweaks ──────────────────────────────────────────────── */
+.wy-side-nav-search {
+    background: var(--cisgs-brand) !important;
+}
+
+.wy-side-nav-search > a img.logo {
+    /* The banner is wide; cap its display height in the sidebar */
+    max-height: 64px;
+    width: auto;
+    margin-bottom: 4px;
+    background: transparent;
+    padding: 4px;
+    border-radius: 6px;
+}
+
+.wy-side-nav-search > div.version {
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+}
+
+.wy-nav-side {
+    background: #1e2a32;
+}
+
+.wy-menu-vertical a:hover {
+    background: var(--cisgs-brand-dark);
+    color: #ffffff;
+}
+
+.wy-menu-vertical li.current > a {
+    border-left: 3px solid var(--cisgs-brand);
+}
+
+/* ── Inline links and accents ────────────────────────────────────── */
+a, a:visited {
+    color: var(--cisgs-brand-dark);
+}
+
+a:hover {
+    color: var(--cisgs-brand);
+}
+
+.rst-content .admonition-title,
+.rst-content .note .admonition-title {
+    background: var(--cisgs-brand);
+}
+
+.rst-content code.literal,
+.rst-content tt.literal {
+    color: var(--cisgs-brand-dark);
+    background: var(--cisgs-bg-tint);
+    border: 1px solid rgba(22, 160, 133, 0.15);
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+/* ── Tables ──────────────────────────────────────────────────────── */
+.rst-content table.docutils thead,
+.rst-content table.docutils thead th {
+    background: var(--cisgs-bg-tint);
+    color: var(--cisgs-brand-dark);
+    border-bottom: 2px solid var(--cisgs-brand);
+}
+
+/* ── Search box rounding ─────────────────────────────────────────── */
+.wy-side-nav-search input[type="text"] {
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* ── Mobile / narrow viewports ───────────────────────────────────── */
+@media (max-width: 768px) {
+    .wy-nav-content {
+        box-shadow: none;
+        border-radius: 0;
+    }
+}

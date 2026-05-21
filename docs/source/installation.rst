@@ -48,9 +48,9 @@ Building the .exe yourself
 
    setup_and_build.bat
 
-See :doc:`../BUILD <https://github.com/Ayushmania2002/Cis-GS/blob/main/BUILD.md>`
-for the PyInstaller spec, macOS/Linux build scripts, and the PyPI release
-workflow.
+See the `BUILD.md <https://github.com/Ayushmania2002/Cis-GS/blob/main/BUILD.md>`_
+in the repo root for the PyInstaller spec, macOS/Linux build scripts, and
+the PyPI release workflow.
 
 First-run setup
 ---------------
