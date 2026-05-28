@@ -642,6 +642,19 @@ def ensure_dirs():
 def safe_mkdir(p):
     p.mkdir(parents=True, exist_ok=True)
 
+def unique_path(p: Path) -> Path:
+    """Return *p* if it does not exist; otherwise return p(1), p(2), … until
+    a non-existent path is found.  Works for both files and directories."""
+    if not p.exists():
+        return p
+    parent, stem, suffix = p.parent, p.stem, p.suffix
+    counter = 1
+    while True:
+        candidate = parent / f"{stem}({counter}){suffix}"
+        if not candidate.exists():
+            return candidate
+        counter += 1
+
 def now_run_name():
     return datetime.now().strftime("run_%Y%m%d_%H%M%S")
 
@@ -2198,15 +2211,17 @@ class NCBITab(BackgroundWidget):
         
         saved = []
         if self._fasta_text:
-            dest = GENOMES_DIR / self.fname_edit.text().strip()
+            dest = unique_path(GENOMES_DIR / self.fname_edit.text().strip())
             safe_mkdir(dest.parent)
             dest.write_text(self._fasta_text, encoding="utf-8")
+            self.fname_edit.setText(dest.name)   # reflect actual saved name
             saved.append(str(dest))
-        
+
         if self._gff_text:
-            dest = ANNOT_DIR / self.gff_fname_edit.text().strip()
+            dest = unique_path(ANNOT_DIR / self.gff_fname_edit.text().strip())
             safe_mkdir(dest.parent)
             dest.write_text(self._gff_text, encoding="utf-8")
+            self.gff_fname_edit.setText(dest.name)   # reflect actual saved name
             saved.append(str(dest))
         
         self.status_lbl.setText(f"Saved {len(saved)} file(s)")
@@ -2412,7 +2427,12 @@ class Step1Tab(BackgroundWidget):
         if not gff or not Path(gff).exists():
             QMessageBox.warning(self, "Cis-GS", "GFF3 not found."); return
         run_name  = self.run_edit.text().strip() or now_run_name()
-        outdir    = RUNS_DIR / run_name / "01_promoters"
+        # Auto-increment run directory to avoid overwriting existing results
+        run_dir   = unique_path(RUNS_DIR / run_name)
+        if run_dir.name != run_name:
+            run_name = run_dir.name
+            self.run_edit.setText(run_name)   # reflect new name in UI
+        outdir    = run_dir / "01_promoters"
         out_fasta = outdir / "promoters.fasta"; out_table = outdir / "promoter_map.csv"
         self.progress.setVisible(True); self.run_btn.setEnabled(False)
         self.status_lbl.setText("Extracting …")
