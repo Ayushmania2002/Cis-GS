@@ -1013,18 +1013,23 @@ def add_pvalues_to_hits(df: "pd.DataFrame") -> "pd.DataFrame":
     else:
         bg_gc = 0.5
 
-    motif_prob = {}
+    # Build motif probability AND pattern length in one pass (avoids per-row
+    # DataFrame filter inside the pval loop — was O(n_hits²) for large datasets)
+    motif_prob    = {}
+    motif_pat_len = {}
     for motif_name in hit_counts["motif_name"].unique():
         pat_rows = df[df["motif_name"] == motif_name]["motif_pattern"]
-        motif_prob[motif_name] = _motif_match_prob(pat_rows.iloc[0], bg_gc) if len(pat_rows) else 0.25**6
+        pat = pat_rows.iloc[0] if len(pat_rows) else "NNNNNN"
+        motif_prob[motif_name]    = _motif_match_prob(pat, bg_gc) if len(pat_rows) else 0.25**6
+        motif_pat_len[motif_name] = len(str(pat))
 
     pval_map = {}
     for _, row in hit_counts.iterrows():
-        gene    = row["record_id"]
-        motif   = row["motif_name"]
-        k       = int(row["hit_count"])
-        L       = int(gene_len.get(gene, 2000))
-        pat_len = len(df.loc[(df["record_id"] == gene) & (df["motif_name"] == motif), "motif_pattern"].iloc[0])
+        gene     = row["record_id"]
+        motif    = row["motif_name"]
+        k        = int(row["hit_count"])
+        L        = int(gene_len.get(gene, 2000))
+        pat_len  = motif_pat_len.get(motif, 6)
         n_pos    = max(1, L - pat_len + 1)
         p_single = motif_prob.get(motif, 0.25**pat_len)
         pval_map[(gene, motif)] = max(float(1.0 - _binom.cdf(k - 1, n_pos, p_single)), 1e-300)
