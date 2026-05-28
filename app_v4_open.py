@@ -58,6 +58,12 @@ try:
 except ImportError:
     LOUVAIN_AVAILABLE = False
 
+try:
+    import igraph as _ig
+    IGRAPH_AVAILABLE = True
+except ImportError:
+    IGRAPH_AVAILABLE = False
+
 # ── PlantTFDB Motif Importer (optional companion module) ──────────────────
 try:
     from planttfdb_importer import open_planttfdb_dialog
@@ -2357,19 +2363,37 @@ def calculate_correlation_matrix(expr_df, method='pearson'):
 def detect_coexpression_modules(corr_matrix, threshold=0.7, method='louvain'):
     if not NETWORKX_AVAILABLE:
         raise ImportError("NetworkX not installed.  Run:  pip install networkx")
-    G = nx.Graph()
     genes = corr_matrix.columns.tolist()
+
+    abs_mat = np.abs(np.asarray(corr_matrix.values, dtype=float))
+    mask = np.triu(abs_mat >= threshold, k=1)
+    rows, cols = np.where(mask)
+    weights = abs_mat[rows, cols]
+
+    G = nx.Graph()
     G.add_nodes_from(genes)
-    for i, g1 in enumerate(genes):
-        for j, g2 in enumerate(genes):
-            if i < j and abs(corr_matrix.iloc[i, j]) >= threshold:
-                G.add_edge(g1, g2, weight=abs(corr_matrix.iloc[i, j]))
-    if method == 'louvain' and LOUVAIN_AVAILABLE:
+    if rows.size:
+        G.add_weighted_edges_from(
+            (genes[r], genes[c], float(w))
+            for r, c, w in zip(rows.tolist(), cols.tolist(), weights.tolist())
+        )
+
+    if method == 'louvain' and IGRAPH_AVAILABLE:
+        ig_g = _ig.Graph(n=len(genes), edges=list(zip(rows.tolist(), cols.tolist())))
+        if rows.size:
+            ig_g.es["weight"] = weights.tolist()
+            part = ig_g.community_multilevel(weights="weight")
+        else:
+            part = ig_g.community_multilevel()
+        membership = part.membership
+        communities = {genes[v]: int(membership[v]) for v in range(len(genes))}
+    elif method == 'louvain' and LOUVAIN_AVAILABLE:
         communities = community_louvain.best_partition(G)
     else:
         communities = {}
         for i, comp in enumerate(nx.connected_components(G)):
-            for node in comp: communities[node] = i
+            for node in comp:
+                communities[node] = i
     return communities, G
 
 def normalize_expression_data(df, method='log2'):
@@ -10132,7 +10156,7 @@ class MainWindow(QMainWindow):
     def _show_about(self):
         """Show about dialog"""
         QMessageBox.about(self, "About Cis-GS",
-            "Cis-GS v1.0.1\n"
+            "Cis-GS v1.2.0\n"
             "Cis-regulatory Element Genome Scanner\n\n"
             "Developed by Ayushman Mallick\n"
             "Plant Signaling Lab, IISER Tirupati\n\n"
