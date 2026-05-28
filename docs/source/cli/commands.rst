@@ -26,6 +26,25 @@ cis-gs search
    cis-gs search --promoters promoters.fa --motifs motifs.meme \
                  [--allow-overlap] [--rc] --out hits.csv
 
+cis-gs logo
+-----------
+
+.. code-block:: bash
+
+   cis-gs logo hits.csv
+   cis-gs logo hits.csv -o ./logos --scale probability
+   cis-gs logo hits.csv --length 9
+
+Generates sequence logo images (PNG) from the ``matched_seq`` column of a
+motif hit CSV produced by ``cis-gs search``. One PNG is written per motif:
+``logos/logo_<motif_name>.png``.
+
+Options:
+
+- ``-o / --outdir DIR``  Output directory (default: ``logos/``)
+- ``--scale``            y-axis scale: ``bits`` (information content, default) or ``probability``
+- ``--length N``         Only include sequences of exactly N bp (useful when a motif has length-variable hits)
+
 cis-gs feed
 -----------
 
