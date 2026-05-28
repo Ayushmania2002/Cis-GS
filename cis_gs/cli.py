@@ -1739,7 +1739,7 @@ def _print_banner():
 
         sys.stdout.write(
             f"\n{D}  Cis-regulatory Element Genome Scanner"
-            f"  ·  v1.0.0"
+            f"  ·  v1.2.0"
             f"  ·  Plant Signaling Lab, IISER Tirupati{R}\n\n"
         )
         sys.stdout.flush()
