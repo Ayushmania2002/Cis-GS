@@ -70,6 +70,8 @@ hiddenimports = [
     'PIL.ImageQt',
     'networkx',
     'community',
+    'igraph',
+    'igraph._igraph',
     'charset_normalizer',
     'chromosome_utils',
     'planttfdb_importer',
@@ -172,7 +174,7 @@ if sys.platform == 'darwin':
         icon=icon_arg,
         bundle_identifier='com.plantsignalinglab.cis-gs',
         info_plist={
-            'CFBundleShortVersionString': '1.0.0',
+            'CFBundleShortVersionString': '1.2.0',
             'CFBundleDisplayName': 'Cis-GS',
             'NSHighResolutionCapable': True,
         },
