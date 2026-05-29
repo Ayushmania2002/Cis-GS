@@ -26,6 +26,34 @@ cis-gs search
    cis-gs search --promoters promoters.fa --motifs motifs.meme \
                  [--allow-overlap] [--rc] --out hits.csv
 
+cis-gs batch
+------------
+
+.. code-block:: bash
+
+   cis-gs batch species.tsv --motifs-file motifs.txt
+   cis-gs batch species.tsv --motifs-file motifs.txt -o results/ --upstream 1500
+
+Runs promoter extraction (Step 1) and motif search (Step 2) for every species
+listed in a tab-separated manifest file, then writes per-species hit CSVs and a
+combined ``batch_hits.csv`` with an extra ``species`` column.
+
+Manifest format (tab-separated, one species per line):
+
+.. code-block:: text
+
+   # species_name<TAB>fasta<TAB>gff3[<TAB>upstream_bp]
+   O. sativa     /data/rice.fa      /data/rice.gff3      2000
+   A. hypogaea   /data/peanut.fa    /data/peanut.gff3    2000
+
+Options:
+
+- ``--motifs-file FILE``  Motifs file - ``NAME<TAB>IUPAC_PATTERN`` per line (required)
+- ``-o / --out DIR``      Output directory (default: ``batch_out/``)
+- ``--upstream BP``       Default upstream length when not specified per row (default: 2000)
+
+Interactive: ``cis-gs wizard batch``
+
 cis-gs logo
 -----------
 

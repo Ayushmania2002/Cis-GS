@@ -6392,7 +6392,7 @@ class MainWindow(QMainWindow):
     def _show_about(self):
         """Show about dialog"""
         QMessageBox.about(self, "About Cis-GS",
-            "Cis-GS v1.2.0\n"
+            "Cis-GS v1.3.0\n"
             "Cis-regulatory Element Genome Scanner\n\n"
             "Developed by Ayushman Mallick\n"
             "Plant Signaling Lab, IISER Tirupati\n\n"

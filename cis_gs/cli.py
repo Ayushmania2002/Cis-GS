@@ -314,6 +314,129 @@ def cmd_search(args):
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# BATCH  -  multi-species extract + search in one run
+# ══════════════════════════════════════════════════════════════════════════════
+
+def cmd_batch(args):
+    """Run promoter extraction + motif search for every species in a manifest."""
+    import pandas as pd
+    from cis_gs.app import extract_promoters, scan_fasta_for_motifs
+
+    manifest = Path(args.manifest)
+    if not manifest.exists():
+        print(f"\n  ERROR: Manifest file not found: {manifest}")
+        print("  Create a TSV with columns: species_name<TAB>fasta<TAB>gff3[<TAB>upstream_bp]")
+        sys.exit(1)
+
+    # ---- parse manifest ---------------------------------------------------
+    rows = []
+    for raw in manifest.read_text(encoding="utf-8", errors="replace").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split("\t")
+        if len(parts) < 3:
+            print(f"  WARNING: Skipping malformed manifest row: {line!r}")
+            continue
+        species  = parts[0].strip()
+        fasta_p  = parts[1].strip()
+        gff3_p   = parts[2].strip()
+        upstream = int(parts[3]) if len(parts) > 3 and parts[3].strip().isdigit() \
+                   else (args.upstream or 2000)
+        rows.append((species, fasta_p, gff3_p, upstream))
+
+    if not rows:
+        print("\n  ERROR: Manifest has no valid rows.")
+        sys.exit(1)
+
+    # ---- load motifs -------------------------------------------------------
+    motifs = []
+    mpath = Path(args.motifs_file)
+    if not mpath.exists():
+        print(f"\n  ERROR: Motifs file not found: {mpath}")
+        sys.exit(1)
+    for line in mpath.read_text(encoding="utf-8", errors="replace").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "\t" in line:
+            name, seq = line.split("\t", 1)
+        elif ": " in line:
+            name, seq = line.split(": ", 1)
+        else:
+            name, seq = line, line
+        motifs.append((name.strip(), seq.strip().upper()))
+
+    if not motifs:
+        print("\n  ERROR: Motifs file is empty or has no valid entries.")
+        sys.exit(1)
+
+    out_dir = Path(args.out)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    print(f"Batch run: {len(rows)} species  x  {len(motifs)} motif(s)")
+    print(f"Output directory: {out_dir}\n")
+
+    all_frames = []
+
+    for species, fasta_path, gff3_path, upstream in rows:
+        fasta = Path(fasta_path)
+        gff3  = Path(gff3_path)
+        safe  = species.replace(" ", "_").replace(".", "").replace("/", "_")
+
+        print(f"  [{species}]")
+        if not fasta.exists():
+            print(f"    WARNING: FASTA not found: {fasta} - skipping")
+            continue
+        if not gff3.exists():
+            print(f"    WARNING: GFF3 not found: {gff3} - skipping")
+            continue
+
+        prom_fa  = out_dir / f"{safe}_promoters.fa"
+        prom_tsv = out_dir / f"{safe}_promoters.tsv"
+
+        print(f"    Extracting {upstream} bp promoters ...")
+        try:
+            extract_promoters(str(fasta), str(gff3), str(prom_fa), str(prom_tsv),
+                              promoter_len=upstream)
+        except Exception as exc:
+            print(f"    WARNING: Extraction failed: {exc} - skipping")
+            continue
+
+        print(f"    Scanning {len(motifs)} motif(s) ...")
+        try:
+            df = scan_fasta_for_motifs(
+                str(prom_fa), motifs,
+                treat_as_iupac=True,
+                allow_overlaps=True,
+                search_revcomp=True,
+            )
+        except Exception as exc:
+            print(f"    WARNING: Search failed: {exc} - skipping")
+            continue
+
+        if isinstance(df, pd.DataFrame) and not df.empty:
+            df.insert(0, "species", species)
+            sp_csv = out_dir / f"{safe}_hits.csv"
+            df.to_csv(sp_csv, index=False)
+            print(f"    {len(df)} hit(s) -> {sp_csv.name}")
+            all_frames.append(df)
+        else:
+            print(f"    No hits found.")
+
+    print()
+    if all_frames:
+        combined = pd.concat(all_frames, ignore_index=True)
+        combined_path = out_dir / "batch_hits.csv"
+        combined.to_csv(combined_path, index=False)
+        print(f"  Combined: {combined_path}  ({len(combined):,} total hits, "
+              f"{combined['species'].nunique()} species)")
+        print(f"\n  Next step: cis-gs feed {combined_path} expression.csv")
+    else:
+        print("  No hits found for any species.")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # LOGO  -  build sequence logos from motif hit CSV
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -1219,6 +1342,46 @@ def _build_parser():
                    help="Only use sequences of this exact length (optional)")
     p.set_defaults(func=cmd_logo)
 
+    # ── batch ─────────────────────────────────────────────────────────────────
+    p = sub.add_parser(
+        "batch",
+        help="Multi-species promoter extraction + motif search from a manifest",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=(
+            "Run promoter extraction and motif search for multiple species in one\n"
+            "automated pass. Reads a tab-separated manifest file where each row\n"
+            "describes one species; writes per-species hit CSVs and a combined\n"
+            "'batch_hits.csv' with an extra 'species' column.\n"
+        ),
+        epilog=(
+            "Manifest format (tab-separated, one species per line):\n"
+            "  species_name<TAB>/path/to/genome.fa<TAB>/path/to/annot.gff3[<TAB>upstream_bp]\n"
+            "  Lines starting with '#' are ignored.\n"
+            "\n"
+            "Example manifest (species.tsv):\n"
+            "  O. sativa\t/data/rice.fa\t/data/rice.gff3\t2000\n"
+            "  A. hypogaea\t/data/peanut.fa\t/data/peanut.gff3\t2000\n"
+            "  M. truncatula\t/data/medicago.fa\t/data/medicago.gff3\t2000\n"
+            "\n"
+            "Examples:\n"
+            "  cis-gs batch species.tsv --motifs-file motifs.txt\n"
+            "  cis-gs batch species.tsv --motifs-file motifs.txt -o results/ --upstream 1500\n"
+            "\n"
+            "Output files in the output directory:\n"
+            "  <species>_promoters.fa    - extracted promoters per species\n"
+            "  <species>_hits.csv        - motif hits per species\n"
+            "  batch_hits.csv            - combined hits (all species, 'species' column added)\n"
+        ),
+    )
+    p.add_argument("manifest", help="TSV manifest file (species, fasta, gff3[, upstream])")
+    p.add_argument("--motifs-file", required=True, metavar="FILE",
+                   help="Motifs file - one NAME<TAB>IUPAC_PATTERN per line")
+    p.add_argument("-o", "--out", default="batch_out", metavar="DIR",
+                   help="Output directory (default: batch_out/)")
+    p.add_argument("--upstream", type=int, default=2000, metavar="BP",
+                   help="Default upstream length in bp used when not specified per-row (default: 2000)")
+    p.set_defaults(func=cmd_batch)
+
     # ── feed ──────────────────────────────────────────────────────────────────
     p = sub.add_parser(
         "feed",
@@ -1572,7 +1735,7 @@ def _build_parser():
     wiz.add_argument(
         "wizard_topic", nargs="?",
         choices=["menu", "kegg", "id", "id-convert", "feed", "coexpr",
-                 "kmeans", "fetch", "extract", "search"],
+                 "kmeans", "fetch", "extract", "search", "batch"],
         help="Wizard to launch (omit for the top-level menu).",
     )
     wiz.set_defaults(func=lambda args: None)  # main() handles dispatch
@@ -1739,7 +1902,7 @@ def _print_banner():
 
         sys.stdout.write(
             f"\n{D}  Cis-regulatory Element Genome Scanner"
-            f"  ·  v1.2.0"
+            f"  ·  v1.3.0"
             f"  ·  Plant Signaling Lab, IISER Tirupati{R}\n\n"
         )
         sys.stdout.flush()
@@ -1810,7 +1973,7 @@ def main():
             interactive_wizard_menu, interactive_kegg_enrichment,
             interactive_id_convert, interactive_feed, interactive_coexpr,
             interactive_kmeans, interactive_fetch, interactive_extract,
-            interactive_search,
+            interactive_search, interactive_batch,
         )
         sub = getattr(args, "wizard_topic", None)
         dispatch = {
@@ -1825,6 +1988,7 @@ def main():
             "fetch":     interactive_fetch,
             "extract":   interactive_extract,
             "search":    interactive_search,
+            "batch":     interactive_batch,
         }
         fn = dispatch.get(sub, interactive_wizard_menu)
         raise SystemExit(int(fn() or 0))

@@ -464,14 +464,15 @@ def prompt_ncbi_taxon() -> str:
 # Top-level menu
 # ---------------------------------------------------------------------------
 _WORKFLOWS = [
-    ("KEGG pathway enrichment",     "interactive_kegg_enrichment"),
-    ("Gene-ID conversion",          "interactive_id_convert"),
-    ("Expression Feeding (filter)", "interactive_feed"),
-    ("Co-expression network",       "interactive_coexpr"),
-    ("K-means clustering",          "interactive_kmeans"),
-    ("NCBI genome fetch",           "interactive_fetch"),
-    ("Promoter extraction (Step 1)","interactive_extract"),
-    ("Motif search (Step 2)",       "interactive_search"),
+    ("KEGG pathway enrichment",          "interactive_kegg_enrichment"),
+    ("Gene-ID conversion",               "interactive_id_convert"),
+    ("Expression Feeding (filter)",      "interactive_feed"),
+    ("Co-expression network",            "interactive_coexpr"),
+    ("K-means clustering",               "interactive_kmeans"),
+    ("NCBI genome fetch",                "interactive_fetch"),
+    ("Promoter extraction (Step 1)",     "interactive_extract"),
+    ("Motif search (Step 2)",            "interactive_search"),
+    ("Multi-species batch (Step 1+2)",   "interactive_batch"),
 ]
 
 
@@ -861,5 +862,61 @@ def interactive_search() -> int:
         cmd_search(args)
     except Exception as exc:
         _err(f"Motif search failed: {exc}")
+        return 1
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# Multi-species batch wizard
+# ---------------------------------------------------------------------------
+def interactive_batch() -> int:
+    _heading("Multi-Species Batch Wizard (Steps 1 + 2)")
+    _info("Runs promoter extraction and motif search for multiple species in one")
+    _info("automated pass. You need:")
+    _info("  1. A manifest TSV listing each species, FASTA path, and GFF3 path")
+    _info("  2. A motifs file (NAME<tab>IUPAC per line)")
+    _info("  3. An output directory")
+    _info("")
+    _info("Manifest format (tab-separated, one species per line):")
+    _info("  species_name<TAB>/path/to/genome.fa<TAB>/path/to/annot.gff3[<TAB>upstream_bp]")
+    _info("  Lines starting with '#' are skipped.")
+    _info("")
+    _info("Example manifest:")
+    _info("  O. sativa     /data/rice.fa       /data/rice.gff3       2000")
+    _info("  A. hypogaea   /data/peanut.fa     /data/peanut.gff3     2000")
+    _info("  M. truncatula /data/medicago.fa   /data/medicago.gff3   2000")
+
+    _step(1, 4, "Manifest file")
+    _info("Path to the TSV manifest file described above.")
+    manifest = prompt_path("Manifest TSV", must_exist=True)
+
+    _step(2, 4, "Motifs file")
+    _info("Path to a motifs file with one NAME<tab>IUPAC_PATTERN per line.")
+    _info("You can export motifs from PlantTFDB with:")
+    _info("  cis-gs tfdb download Ath && cis-gs tfdb filter Ath_TF_binding_motifs.meme -o motifs.txt")
+    motifs_file = prompt_path("Motifs file", must_exist=True)
+
+    _step(3, 4, "Default upstream length")
+    _info("Used for any species row that does not specify an upstream column.")
+    upstream = prompt_int("Upstream bp", default=2000, min_val=100)
+
+    _step(4, 4, "Output directory")
+    _info("Per-species promoter FASTAs, hit CSVs, and a combined batch_hits.csv")
+    _info("will all be written here.")
+    out_dir = prompt("Output directory", default="batch_out")
+
+    print()
+    import argparse as _ap
+    args = _ap.Namespace(
+        manifest=str(manifest),
+        motifs_file=str(motifs_file),
+        upstream=upstream,
+        out=out_dir,
+    )
+    try:
+        from cis_gs.cli import cmd_batch
+        cmd_batch(args)
+    except Exception as exc:
+        _err(f"Batch run failed: {exc}")
         return 1
     return 0

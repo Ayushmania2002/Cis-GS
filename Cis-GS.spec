@@ -174,7 +174,7 @@ if sys.platform == 'darwin':
         icon=icon_arg,
         bundle_identifier='com.plantsignalinglab.cis-gs',
         info_plist={
-            'CFBundleShortVersionString': '1.2.0',
+            'CFBundleShortVersionString': '1.3.0',
             'CFBundleDisplayName': 'Cis-GS',
             'NSHighResolutionCapable': True,
         },
