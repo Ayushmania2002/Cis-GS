@@ -1,6 +1,85 @@
 Changelog
 =========
 
+v1.3.2 — 2026-06
+----------------
+
+**Fixes**
+
+* Corrected PyPI author metadata — ``Author`` field now correctly displays
+  *Ayushman Mallick, Plant Signaling Lab, IISER Tirupati* on PyPI and
+  pypistats.org.
+
+----
+
+v1.3.1 — 2026-06
+----------------
+
+**Fixes**
+
+* First attempt at PyPI author field correction (superseded by v1.3.2).
+
+----
+
+v1.3.0 — 2026-06
+----------------
+
+**Highlights**
+
+* **Multi-species batch mode** — new ``cis-gs batch`` subcommand accepts a
+  tab-separated manifest file (species, FASTA path, GFF3 path, optional
+  upstream bp) and runs promoter extraction + motif search for every species
+  in a single automated pass, writing per-species hit CSVs and a combined
+  ``batch_hits.csv`` with a ``species`` column.
+* **Batch wizard** — ``cis-gs wizard batch`` provides a step-by-step
+  interactive guide for the new batch workflow, consistent with all other
+  wizard commands.
+
+**Documentation**
+
+* Added ``cis-gs batch`` to the CLI command reference.
+* Rewrote the Wizard page with a full workflow table and dedicated
+  multi-species batch section.
+* Added missing ``cis-gs logo`` command to the CLI reference (was
+  implemented but not documented).
+
+----
+
+v1.2.0 — 2026-05
+----------------
+
+**Highlights**
+
+* **37× faster Louvain clustering** — replaced the O(N²) Python double loop
+  for co-expression graph construction with NumPy vectorised masking
+  (``np.triu``), and switched the community-detection backend from
+  ``python-louvain`` + NetworkX to the ``igraph`` C-library
+  (``community_multilevel``).  Louvain time for *A. hypogaea* (56 513 genes)
+  dropped from ~150 s to ~4 s.
+* **igraph added as a dependency** — ``igraph >= 0.11`` added to
+  ``pyproject.toml``; ``python-louvain`` retained as fallback.
+* **PyInstaller bundle updated** — ``igraph`` and ``igraph._igraph`` added to
+  ``hiddenimports`` in ``Cis-GS.spec``; Windows ``.exe`` rebuilt and uploaded
+  to the v1.2.0 GitHub release.
+
+**Performance (benchmarked)**
+
+* Promoter extraction: 11–87 s across four genome assemblies (O(C) disk reads,
+  where C = chromosome count).
+* Motif scanning: 6–18 s scaling linearly with sequence count.
+* KEGG REST retrieval: 5–8 s on first use; < 30 ms on subsequent calls via
+  local disk cache (229–311× speedup).
+* Full co-expression pipeline (normalisation → Pearson → Louvain → k-means):
+  77–159 s per species.
+
+**Fixes**
+
+* All em dashes replaced with hyphens throughout GUI and CLI output.
+* ``scan_fasta_for_motifs`` import aligned with the canonical function name
+  in ``cis_gs.app``.
+
+----
+
 v1.1.0 — 2026-05
 ----------------
 
@@ -31,6 +110,8 @@ v1.1.0 — 2026-05
 * Expression-Feeding tab section overlap (now scrollable).
 * Tab labels no longer clip ("NCBI Fetc", "Step 1: Promoter").
 * Theme switch no longer freezes the UI for 1-2 s.
+
+----
 
 v1.0.0 — 2026-03
 ----------------
