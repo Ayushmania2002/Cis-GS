@@ -7,7 +7,7 @@ v1.3.2 — 2026-06
 **Fixes**
 
 * Corrected PyPI author metadata — ``Author`` field now correctly displays
-  *Ayushman Mallick, Plant Signaling Lab, IISER Tirupati* on PyPI and
+  the authors on PyPI and
   pypistats.org.
 
 ----
