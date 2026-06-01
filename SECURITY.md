@@ -119,4 +119,4 @@ critical issues, and **90 days** for low-severity issues.
 | General issues | [GitHub Issues](https://github.com/Ayushmania2002/Cis-GS/issues) |
 | Documentation | https://ayushmania2002.github.io/Cis-GS/ |
 
-*Cis-GS is developed at the Plant Signaling Lab, IISER Tirupati.*
+*Cis-GS is developed at the Plant Signaling Lab, IISER Tirupati, India.*
