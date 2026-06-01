@@ -8,7 +8,7 @@
 
 [![PyPI](https://img.shields.io/pypi/v/cis-gs?logo=pypi&logoColor=white&color=16A085&label=PyPI)](https://pypi.org/project/cis-gs/)
 [![Python](https://img.shields.io/pypi/pyversions/cis-gs?logo=python&logoColor=white&color=16A085)](https://pypi.org/project/cis-gs/)
-[![Downloads](https://static.pepy.tech/badge/cis-gs?color=16A085)](https://pypistats.org/packages/cis-gs)
+[![Downloads](https://img.shields.io/pypi/dt/cis-gs?logo=pypi&logoColor=white&color=16A085&label=Downloads%20(all%20time))](https://pypistats.org/packages/cis-gs)
 [![GitHub Downloads](https://img.shields.io/github/downloads/Ayushmania2002/Cis-GS/total?logo=github&logoColor=white&color=16A085&label=.exe%20Downloads)](https://github.com/Ayushmania2002/Cis-GS/releases)
 [![Visitors](https://visitor-badge.laobi.icu/badge?page_id=Ayushmania2002.Cis-GS&left_color=%23555555&right_color=%2316A085&left_text=Visitors)](https://github.com/Ayushmania2002/Cis-GS)
 [![License](https://img.shields.io/badge/License-MIT-yellow?logo=opensourceinitiative&logoColor=white)](LICENSE)
