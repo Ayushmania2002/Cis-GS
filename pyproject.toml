@@ -4,16 +4,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cis-gs"
-version = "1.3.2.1"
+version = "1.3.2.2"
 description = "Cis-regulatory Element Genome Scanner - whole-genome cis-element discovery, expression coupling, and KEGG enrichment in one PyQt5 + CLI pipeline."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"
 authors = [
-    { name = "Ayushman Mallick, Plant Signaling Lab, IISER Tirupati" },
     { name = "Ayushman Mallick", email = "ayushmania2002@gmail.com" },
 ]
 maintainers = [
+    { name = "Plant Signaling Lab, IISER Tirupati" },
     { name = "Ayushman Mallick", email = "ayushmania2002@gmail.com" },
 ]
 keywords = [

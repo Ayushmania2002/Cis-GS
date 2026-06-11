@@ -7,6 +7,6 @@ cis-regulatory elements across genomes.
 Developed at Plant Signaling Lab, IISER Tirupati.
 """
 
-__version__ = "1.3.2.1"
+__version__ = "1.3.2.2"
 __author__ = "Ayushman Mallick, Plant Signaling Lab, IISER Tirupati"
 __license__ = "MIT"

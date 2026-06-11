@@ -1,6 +1,20 @@
 Changelog
 =========
 
+v1.3.2.2 — 2026-06
+------------------
+
+**Fixes**
+
+* Cleaned up the ``authors`` / ``maintainers`` fields in
+  ``pyproject.toml`` so that the package's ``Author`` metadata renders
+  cleanly as ``Ayushman Mallick`` on PyPI and pepy.tech. The
+  ``Plant Signaling Lab, IISER Tirupati`` attribution is now carried in
+  the ``Maintainer`` field, eliminating comma-driven truncation issues
+  on third-party indexes.
+
+----
+
 v1.3.2.1 — 2026-06
 ------------------
 
