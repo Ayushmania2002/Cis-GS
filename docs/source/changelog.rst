@@ -1,6 +1,17 @@
 Changelog
 =========
 
+v1.3.2.1 — 2026-06
+------------------
+
+**Fixes**
+
+* Replaced broken shields.io ``pypi/dt`` downloads badge with the
+  pepy.tech all-time downloads badge in the README, ensuring the
+  downloads counter renders correctly on both GitHub and PyPI.
+
+----
+
 v1.3.2 — 2026-06
 ----------------
 
