@@ -1,6 +1,23 @@
 Changelog
 =========
 
+v1.3.2.3 — 2026-08
+------------------
+
+**Fixes**
+
+* Fixed a severe performance bug in the Step 2 motif-search significance
+  (p-value / FDR) calculation: the per-gene/motif p-value lookup re-scanned
+  the *entire* hits table on every iteration (an accidental O(n²) pattern),
+  which could hang indefinitely on genome-wide promoter sets with a short,
+  common motif (e.g. a 5 bp IUPAC pattern against 100,000+ promoters).
+  Replaced with a precomputed lookup dict and vectorized pandas indexing.
+  Verified on a 106,608-promoter genome-wide run: full scan + significance
+  calculation now completes in ~21 seconds (previously did not finish after
+  30+ minutes).
+
+----
+
 v1.3.2.2 — 2026-06
 ------------------
 

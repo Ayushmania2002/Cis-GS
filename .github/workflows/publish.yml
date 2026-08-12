@@ -59,7 +59,12 @@ jobs:
           path: dist/
 
       - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # Skip files that already exist on PyPI instead of failing the
+          # workflow. Avoids "400 File already exists" when re-running the
+          # publish step after a partial upload (PyPI files are immutable).
+          skip-existing: true
         # Falls back to a stored token if trusted publishing is not configured.
         # Add it as repo secret PYPI_API_TOKEN, then uncomment:
-        # with:
-        #   password: ${{ secrets.PYPI_API_TOKEN }}
+        # # with:
+        # #   password: ${{ secrets.PYPI_API_TOKEN }}
