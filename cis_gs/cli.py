@@ -304,6 +304,16 @@ def cmd_search(args):
         output.parent.mkdir(parents=True, exist_ok=True)
         df.to_csv(output, index=False)
         print(f"  {len(df)} hit(s) found")
+        enr = getattr(df, "attrs", {}).get("motif_enrichment")
+        if enr:
+            print("  Motif-level enrichment vs. composition-matched expectation:")
+            for mname, e in enr.items():
+                print(f"    {mname:<24} observed {e['observed']:>8,}  expected {e['expected']:>10,.1f}"
+                      f"  fold {e['fold']:>6.2f}  P {e['p_value']:.2e}")
+        if "p_value_adj" in df.columns:
+            n_sig = int((df["p_value_adj"] <= 0.05).sum())
+            print(f"  {n_sig} of {len(df)} hit(s) significant at BH-FDR <= 0.05 "
+                  f"(corrected over all promoters x motifs)")
         print(f"  Saved: {output}")
         print(f"\n  Next step: cis-gs logo {output}  OR  cis-gs feed {output} expression.csv")
     else:

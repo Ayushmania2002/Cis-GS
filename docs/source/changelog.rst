@@ -1,6 +1,43 @@
 Changelog
 =========
 
+v1.3.2.4 — 2026-10
+------------------
+
+**Fixes**
+
+* ``cis-gs extract`` and ``cis-gs batch`` no longer fail with
+  ``'str' object has no attribute 'open'`` (path arguments are now coerced
+  to ``Path``).
+* **Motif significance model corrected.** The per-promoter binomial test now
+  uses each promoter's own base composition (previously a single GC value
+  estimated from the hit sequences themselves), and the Benjamini-Hochberg
+  correction is applied over all promoters x motif strands scanned
+  (previously only over pairs that already had a hit, which flagged nearly
+  every hit as significant). The set of hits is unchanged; the ``p_value``,
+  ``p_value_adj`` and ``significance`` columns change, so results from
+  earlier versions should not be compared directly. Validated on
+  composition-preserving shuffled promoter sets (no false positives).
+
+**Features**
+
+* ``cis-gs search`` now reports a motif-level enrichment summary (observed
+  versus expected hits under the composition-matched null) and the number
+  of hits significant at FDR <= 0.05.
+
+**Performance**
+
+* Promoter extraction reads through a FASTA offset index (samtools ``.fai``
+  compatible, built in memory if absent) instead of loading whole
+  chromosomes. On the 2.6 Gb *Arachis hypogaea* genome (106,608 promoters)
+  extraction dropped from ~63 s / 1.9 GB to ~5 s / 0.4 GB with
+  byte-identical output. The GUI build previously re-read the chromosome
+  for every gene and benefits as well. Irregular FASTA layouts fall back to
+  the previous reader.
+* Motif scanning parses the FASTA once instead of once per motif.
+
+----
+
 v1.3.2.3 — 2026-08
 ------------------
 

@@ -671,6 +671,7 @@ class GeneRecord:
     strand: str; gene_id: str; gene_name: str
 
 def parse_gff3_genes(gff_path, feature_preference="gene"):
+    gff_path = Path(gff_path)
     genes, mrnas = [], []
     def parse_attrs(attr_str):
         d = {}
@@ -804,9 +805,181 @@ def build_transcript_map_from_gff3(gff_path):
     return result
 
 
+class _FastaIndexError(Exception):
+    """FASTA layout is not suitable for offset-based random access."""
+
+
+class _IndexedFasta:
+    """
+    Minimal random-access FASTA reader (samtools .fai compatible, no extra
+    dependency).  Only the requested interval is read from the file, so extracting 100,000 promoters from a multi-Gb genome never loads a
+    whole chromosome.  An existing '<fasta>.fai' is used when present and
+    up to date; otherwise the index is built once in memory (a few seconds for
+    a 2.6 Gb genome).  Raises _FastaIndexError for irregular line layouts so
+    the caller can fall back to the slower, fully general path.
+    """
+
+    def __init__(self, path):
+        self.path = str(path)
+        self._fh = open(self.path, "rb", buffering=0)
+        try:
+            self.index = self._load_fai() or self._build_index()
+        except Exception:
+            self.close()
+            raise
+
+    def _load_fai(self):
+        fai = self.path + ".fai"
+        try:
+            if not os.path.exists(fai) or os.path.getmtime(fai) < os.path.getmtime(self.path):
+                return None
+            idx = {}
+            with open(fai, "r", encoding="utf-8") as fh:
+                for line in fh:
+                    f = line.rstrip("\n").split("\t")
+                    idx[f[0]] = (int(f[1]), int(f[2]), int(f[3]), int(f[4]))
+            return idx or None
+        except Exception:
+            return None
+
+    def _build_index(self):
+        import mmap
+        import numpy as np
+        try:
+            mm = mmap.mmap(self._fh.fileno(), 0, access=mmap.ACCESS_READ)
+        except Exception as exc:
+            raise _FastaIndexError(str(exc))
+        try:
+            return self._build_index_from(mm, np)
+        finally:
+            try:
+                mm.close()
+            except Exception:
+                pass   # a view of the map may still be alive; freed with it
+
+    def _build_index_from(self, mm, np):
+        import mmap as mmap_mod
+        size = len(mm)
+        arr = np.frombuffer(mm, dtype=np.uint8)
+        idx = {}
+        pos = 0 if size and mm[0:1] == b">" else mm.find(b"\n>") + 1
+        if size == 0 or pos < 0 or (pos == 0 and mm[0:1] != b">"):
+            raise _FastaIndexError("not a FASTA file")
+        while pos < size:
+            hdr_end = mm.find(b"\n", pos)
+            if hdr_end < 0:
+                break
+            name = mm[pos + 1:hdr_end].decode("utf-8", "replace").strip().split()
+            name = name[0] if name else ""
+            seq_start = hdr_end + 1
+            nxt = mm.find(b"\n>", hdr_end)
+            end = size if nxt < 0 else nxt + 1
+            reg = arr[seq_start:end]
+            if name in idx:
+                raise _FastaIndexError("duplicate sequence name")
+            if reg.size == 0:
+                idx[name] = (0, seq_start, 0, 0)
+            else:
+                nl = np.flatnonzero(reg == 10)
+                if nl.size == 0:
+                    lb = lw = int(reg.size)
+                    idx[name] = (lb, seq_start, lb, lw)
+                else:
+                    lw = int(nl[0]) + 1
+                    term = 2 if (nl[0] > 0 and reg[nl[0] - 1] == 13) else 1
+                    lb = lw - term
+                    if term == 2 and not np.all(reg[nl - 1] == 13):
+                        raise _FastaIndexError("mixed line endings")
+                    starts = np.concatenate(([0], nl + 1))
+                    ends = np.concatenate((nl + 1, [reg.size]))
+                    lens = (ends - starts)[starts < reg.size]
+                    if lens.size > 1 and not np.all(lens[:-1] == lw):
+                        raise _FastaIndexError("irregular line length")
+                    if lens[-1] > lw:
+                        raise _FastaIndexError("irregular last line")
+                    length = int(reg.size - nl.size * term)
+                    if lb <= 0:
+                        raise _FastaIndexError("empty first line")
+                    idx[name] = (length, seq_start, lb, lw)
+            pos = end
+            if hasattr(mm, "madvise") and hasattr(mmap_mod, "MADV_DONTNEED"):
+                try:
+                    mm.madvise(mmap_mod.MADV_DONTNEED)   # keep resident set small
+                except Exception:
+                    pass
+        if not idx:
+            raise _FastaIndexError("no sequences found")
+        return idx
+
+    def __contains__(self, name):
+        return name in self.index
+
+    def length(self, name):
+        return self.index[name][0]
+
+    def fetch(self, name, start0, end0):
+        """Upper-case sequence for the 0-based half-open interval [start0, end0)."""
+        length, off, lb, lw = self.index[name]
+        start0 = max(0, int(start0)); end0 = min(length, int(end0))
+        if end0 <= start0 or lb <= 0:
+            return ""
+        first = off + (start0 // lb) * lw + start0 % lb
+        last = off + ((end0 - 1) // lb) * lw + (end0 - 1) % lb
+        self._fh.seek(first)
+        raw = self._fh.read(last - first + 1)
+        if lw != lb or b"\n" in raw:
+            raw = raw.replace(b"\r", b"").replace(b"\n", b"")
+        return raw.decode("ascii", "replace").upper()
+
+    def close(self):
+        try:
+            self._fh.close()
+        except Exception:
+            pass
+
+
+class _SeqIOFasta:
+    """General fallback with the same interface (one chromosome cached at a time)."""
+
+    def __init__(self, path):
+        self._idx = SeqIO.index(str(path), "fasta")
+        self._cache_name, self._cache_seq = None, ""
+
+    def __contains__(self, name):
+        return name in self._idx
+
+    def _seq(self, name):
+        if name != self._cache_name:
+            self._cache_seq = str(self._idx[name].seq).upper()
+            self._cache_name = name
+        return self._cache_seq
+
+    def length(self, name):
+        return len(self._seq(name))
+
+    def fetch(self, name, start0, end0):
+        return self._seq(name)[max(0, start0):max(0, end0)]
+
+    def close(self):
+        try:
+            self._idx.close()
+        except Exception:
+            pass
+
+
+def _open_random_access_fasta(path):
+    try:
+        return _IndexedFasta(path)
+    except _FastaIndexError:
+        return _SeqIOFasta(path)
+    except Exception:
+        return _SeqIOFasta(path)
+
+
 def extract_promoters(genome_fasta, gff3, out_fasta, out_table,
                       promoter_len=1000, feature_preference="gene"):
-    genome_index = SeqIO.index(str(genome_fasta), "fasta")
+    out_fasta, out_table = Path(out_fasta), Path(out_table)
+    genome_index = _open_random_access_fasta(genome_fasta)
     genes = parse_gff3_genes(gff3, feature_preference=feature_preference)
 
     # Validate that we have genes
@@ -819,10 +992,9 @@ def extract_promoters(genome_fasta, gff3, out_fasta, out_table,
             f"and the conversion completed successfully (check the preview tab)."
         )
 
-    # ── Group genes by chromosome so each chromosome sequence is loaded only
-    # once from disk (SeqIO.index reads from file on every access; without
-    # grouping a 70 k-gene genome triggers 70 k random seeks instead of ~20).
-    # This alone gives a 3–6× wall-time speedup on large genomes.
+    # ── Genes are grouped by chromosome (stable output order).  Sequence is
+    # read through an offset index, so only the requested promoter intervals
+    # are touched on disk.
     from collections import defaultdict
     chr_to_genes: dict = defaultdict(list)
     seqid_map: dict = {}          # GFF seqid → FASTA key (handles Chr/chr mismatches)
@@ -848,16 +1020,14 @@ def extract_promoters(genome_fasta, gff3, out_fasta, out_table,
     safe_mkdir(out_fasta.parent); safe_mkdir(out_table.parent)
     with open(out_fasta, "w", encoding="utf-8") as out_f:
         for fasta_key, gene_list in chr_to_genes.items():
-            seqrec = genome_index[fasta_key]          # one disk read per chromosome
-            seq_str = str(seqrec.seq).upper()         # cache as plain string
-            seqlen  = len(seq_str)
+            seqlen = genome_index.length(fasta_key)   # indexed: no chromosome is loaded
             for g in gene_list:
                 if g.strand == "+":
                     p_end   = g.start - 1
                     p_start = max(1, p_end - promoter_len + 1)
                     if p_end < 1:
                         continue
-                    prom = seq_str[p_start - 1:p_end]
+                    prom = genome_index.fetch(fasta_key, p_start - 1, p_end)
                 else:
                     p_start = g.end + 1
                     p_end   = min(seqlen, p_start + promoter_len - 1)
@@ -865,7 +1035,7 @@ def extract_promoters(genome_fasta, gff3, out_fasta, out_table,
                         continue
                     # reverse complement via str ops (avoids Seq object overhead)
                     _comp = str.maketrans("ACGTN", "TGCAN")
-                    prom = seq_str[p_start - 1:p_end].translate(_comp)[::-1]
+                    prom = genome_index.fetch(fasta_key, p_start - 1, p_end).translate(_comp)[::-1]
                 header = (f"{g.gene_id}|{g.gene_name}|"
                           f"{fasta_key}:{p_start}-{p_end}({g.strand})")
                 out_f.write(f">{header}\n")
@@ -921,6 +1091,11 @@ def record_to_gene_id(record_id):
 def scan_fasta_for_motifs(fasta_path, motifs, treat_as_iupac=True,
                           allow_overlaps=True, search_revcomp=True, context_bp=0):
     rows = []
+    # Parse the FASTA once (not once per motif) and record each promoter's base
+    # composition for the composition-matched significance model.
+    records = [(rec.id, str(rec.seq).upper()) for rec in SeqIO.parse(str(fasta_path), "fasta")]
+    base_counts = {rid: (s.count("A"), s.count("C"), s.count("G"), s.count("T"))
+                   for rid, s in records}
     for name, pat in motifs:
         rex = iupac_to_regex(pat) if treat_as_iupac else pat
         cre = re.compile(f"(?=({rex}))" if allow_overlaps else rex, flags=re.IGNORECASE)
@@ -931,14 +1106,13 @@ def scan_fasta_for_motifs(fasta_path, motifs, treat_as_iupac=True,
                 rc_rex = iupac_to_regex(rc_pat)
                 rc_cre = re.compile(f"(?=({rc_rex}))" if allow_overlaps else rc_rex, flags=re.IGNORECASE)
             except: rc_cre = None
-        for rec in SeqIO.parse(str(fasta_path), "fasta"):
-            seq = str(rec.seq).upper()
+        for rec_id, seq in records:
             seq_len = len(seq)   # true promoter length for significance test
-            gene_id, gene_name = record_to_gene_id(rec.id)
+            gene_id, gene_name = record_to_gene_id(rec_id)
             for m in cre.finditer(seq):
                 if allow_overlaps: start = m.start(1)+1; match_seq = m.group(1); end = start+len(match_seq)-1
                 else: start = m.start()+1; match_seq = m.group(0); end = m.end()
-                rows.append({"record_id":rec.id,"gene_id":gene_id,"gene_name":gene_name,
+                rows.append({"record_id":rec_id,"gene_id":gene_id,"gene_name":gene_name,
                     "motif_name":name,"motif_pattern":pat,"strand":"+",
                     "start_1based":start,"end_1based":end,"matched_seq":match_seq,
                     "seq_len":seq_len,
@@ -948,35 +1122,41 @@ def scan_fasta_for_motifs(fasta_path, motifs, treat_as_iupac=True,
                 for m in rc_cre.finditer(seq):
                     if allow_overlaps: start = m.start(1)+1; match_seq = m.group(1); end = start+len(match_seq)-1
                     else: start = m.start()+1; match_seq = m.group(0); end = m.end()
-                    rows.append({"record_id":rec.id,"gene_id":gene_id,"gene_name":gene_name,
+                    rows.append({"record_id":rec_id,"gene_id":gene_id,"gene_name":gene_name,
                         "motif_name":name+"_RC","motif_pattern":rc_pat,"strand":"-",
                         "start_1based":start,"end_1based":end,"matched_seq":match_seq,
                         "seq_len":seq_len,
                         "context_up":seq[max(0,start-1-context_bp):start-1] if context_bp else "",
                         "context_down":seq[end:min(len(seq),end+context_bp)] if context_bp else ""})
     df = pd.DataFrame(rows)
-    
+
     if not df.empty:
         if CHROMOSOME_UTILS_AVAILABLE:
             df = add_chromosome_column(df)
         df = df.sort_values(["gene_id","motif_name","start_1based"]).reset_index(drop=True)
         # Add p-value / significance
         try:
-            df = add_pvalues_to_hits(df)
-        except Exception:
-            pass   # scipy not available — skip silently
-    
+            df = add_pvalues_to_hits(df, base_counts=base_counts, n_promoters=len(records))
+        except ImportError:
+            pass   # scipy not available - skip
+        except Exception as e:
+            warnings.warn(f"Significance calculation skipped: {e}")
+
     return df
 
 # ── Statistical significance (p-value) for motif hits ────────────────────
-def _motif_match_prob(motif_pattern: str, bg_gc: float = 0.5) -> float:
+def _motif_match_prob(motif_pattern: str, bg_gc=0.5) -> float:
     """
-    Compute the probability that a random nucleotide matches one position
-    of a IUPAC motif, given a GC background frequency.
-    Returns the probability that a random string of the motif's length
-    matches the whole motif (product across positions).
+    Probability that a random string of the motif's length matches the whole
+    (IUPAC) motif at one position.
+
+    ``bg_gc`` is either a GC fraction (legacy form) or a dict of per-base
+    frequencies {"A":..,"C":..,"G":..,"T":..}.
     """
-    bg = {"A": (1-bg_gc)/2, "C": bg_gc/2, "G": bg_gc/2, "T": (1-bg_gc)/2}
+    if isinstance(bg_gc, dict):
+        bg = {b: float(bg_gc.get(b, 0.25)) for b in "ACGT"}
+    else:
+        bg = {"A": (1-bg_gc)/2, "C": bg_gc/2, "G": bg_gc/2, "T": (1-bg_gc)/2}
     IUPAC_BASES = {
         "A":["A"],"C":["C"],"G":["G"],"T":["T"],
         "R":["A","G"],"Y":["C","T"],"S":["G","C"],"W":["A","T"],
@@ -990,12 +1170,45 @@ def _motif_match_prob(motif_pattern: str, bg_gc: float = 0.5) -> float:
     return prob
 
 
-def add_pvalues_to_hits(df: "pd.DataFrame") -> "pd.DataFrame":
+_P_IUPAC_IDX = {
+    "A":[0],"C":[1],"G":[2],"T":[3],"U":[3],
+    "R":[0,2],"Y":[1,3],"S":[1,2],"W":[0,3],"K":[2,3],"M":[0,1],
+    "B":[1,2,3],"D":[0,2,3],"H":[0,1,3],"V":[0,1,2],"N":[0,1,2,3],
+}
+
+
+def _pattern_probs(pattern, freqs):
+    """Vectorised per-position match probability product.
+    freqs: (n, 4) array of A,C,G,T frequencies -> (n,) probability array."""
+    import numpy as np
+    p = np.ones(freqs.shape[0])
+    for ch in str(pattern).upper():
+        idx = _P_IUPAC_IDX.get(ch, [0, 1, 2, 3])
+        p = p * freqs[:, idx].sum(axis=1)
+    return p
+
+
+def add_pvalues_to_hits(df: "pd.DataFrame", base_counts=None, n_promoters=None) -> "pd.DataFrame":
     """
-    Add p_value, p_value_adj (FDR Benjamini-Hochberg), neg_log10_p, and significance columns.
-    Uses true promoter length (seq_len column) and BH-FDR correction.
+    Add p_value, p_value_adj (Benjamini-Hochberg), neg_log10_p and significance.
+
+    Model (per promoter x motif strand): P(>= k hits) under a binomial with
+    L - w + 1 trials, where the per-position match probability is computed from
+    THAT PROMOTER's own base composition (``base_counts``: record_id ->
+    (nA, nC, nG, nT)), i.e. a composition-matched null, so GC-rich motifs are
+    not over-called in GC-rich promoters.  Without ``base_counts`` a uniform
+    0.25 background is used.
+
+    Multiple testing: Benjamini-Hochberg over ALL promoters x motif strands
+    scanned (``n_promoters`` x number of motif names), not only the pairs that
+    already contain a hit.  Untested pairs have p = 1 and cannot change the
+    ranks of the tested ones.
+
+    Also stores a motif-level enrichment summary (observed hits vs. the
+    expected number under the same null, one-sided Poisson) in
+    ``df.attrs["motif_enrichment"]`` when ``base_counts`` is available.
     """
-    from scipy.stats import binom as _binom
+    from scipy.stats import binom as _binom, poisson as _poisson
     import numpy as np
 
     if df.empty:
@@ -1003,63 +1216,55 @@ def add_pvalues_to_hits(df: "pd.DataFrame") -> "pd.DataFrame":
             df[col] = None
         return df
 
-    # Use real seq_len if available; fallback to max-hit-pos (underestimates — old bug)
     if "seq_len" in df.columns:
-        gene_len = df.groupby("record_id")["seq_len"].max().to_dict()
+        gene_len = df.groupby("record_id")["seq_len"].max()
     else:
-        gene_len = df.groupby("record_id")["end_1based"].max().to_dict()
+        gene_len = df.groupby("record_id")["end_1based"].max()
 
-    hit_counts = (df.groupby(["record_id", "motif_name"])
-                    .size().reset_index(name="hit_count"))
+    pairs = (df.groupby(["record_id", "motif_name"]).size()
+               .reset_index(name="hit_count"))
+    motif_pattern = df.groupby("motif_name")["motif_pattern"].first().to_dict()
+    motif_names = list(motif_pattern)
 
-    if "matched_seq" in df.columns:
-        all_seq = "".join(df["matched_seq"].dropna().astype(str)).upper()
-        gc = (all_seq.count("G") + all_seq.count("C")) / max(len(all_seq), 1)
-        bg_gc = max(0.1, min(0.9, gc))
+    # per-promoter base frequencies for the tested pairs
+    rec_ids = pairs["record_id"].to_numpy()
+    if base_counts:
+        cnt = np.array([base_counts.get(r, (1, 1, 1, 1)) for r in rec_ids], dtype=float)
+        tot = cnt.sum(axis=1, keepdims=True)
+        tot[tot == 0] = 1.0
+        freqs = cnt / tot
     else:
-        bg_gc = 0.5
+        freqs = np.full((len(pairs), 4), 0.25)
 
-    # Build motif probability AND pattern length in one pass (avoids per-row
-    # DataFrame filter inside the pval loop — was O(n_hits²) for large datasets)
-    motif_prob    = {}
-    motif_pat_len = {}
-    for motif_name in hit_counts["motif_name"].unique():
-        pat_rows = df[df["motif_name"] == motif_name]["motif_pattern"]
-        pat = pat_rows.iloc[0] if len(pat_rows) else "NNNNNN"
-        motif_prob[motif_name]    = _motif_match_prob(pat, bg_gc) if len(pat_rows) else 0.25**6
-        motif_pat_len[motif_name] = len(str(pat))
+    pvals = np.ones(len(pairs))
+    for mname in motif_names:
+        sel = (pairs["motif_name"] == mname).to_numpy()
+        if not sel.any():
+            continue
+        pat = motif_pattern[mname]
+        p_single = _pattern_probs(pat, freqs[sel])
+        L = gene_len.reindex(pairs.loc[sel, "record_id"]).to_numpy(dtype=float)
+        n_pos = np.maximum(1, L - len(str(pat)) + 1).astype(int)
+        k = pairs.loc[sel, "hit_count"].to_numpy(dtype=int)
+        pvals[sel] = _binom.sf(k - 1, n_pos, np.clip(p_single, 1e-300, 1.0))
+    pvals = np.clip(pvals, 1e-300, 1.0)
 
-    pval_map = {}
-    for _, row in hit_counts.iterrows():
-        gene     = row["record_id"]
-        motif    = row["motif_name"]
-        k        = int(row["hit_count"])
-        L        = int(gene_len.get(gene, 2000))
-        pat_len  = motif_pat_len.get(motif, 6)
-        n_pos    = max(1, L - pat_len + 1)
-        p_single = motif_prob.get(motif, 0.25**pat_len)
-        pval_map[(gene, motif)] = max(float(1.0 - _binom.cdf(k - 1, n_pos, p_single)), 1e-300)
+    # Benjamini-Hochberg over every promoter x motif strand that was scanned
+    n_prom = int(n_promoters) if n_promoters else int(df["record_id"].nunique())
+    m_tests = max(len(pairs), n_prom * len(motif_names))
+    order = np.argsort(pvals)
+    ranks = np.empty(len(pvals), dtype=float)
+    ranks[order] = np.arange(1, len(pvals) + 1)
+    adj = np.minimum(1.0, pvals * m_tests / ranks)
+    adj_sorted = adj[order]
+    adj_sorted = np.minimum.accumulate(adj_sorted[::-1])[::-1]
+    adj[order] = adj_sorted
 
     df = df.copy()
-    # Vectorized lookup via MultiIndex.map — a df.apply(axis=1) row-wise
-    # Python callback over a large hits table (tens/hundreds of thousands of
-    # rows on genome-wide runs) is orders of magnitude slower than this.
     row_idx = pd.MultiIndex.from_arrays([df["record_id"], df["motif_name"]])
-
-    # Benjamini-Hochberg FDR
-    n_tests      = len(pval_map)
-    keys         = list(pval_map.keys())
-    unique_pvals = np.array([pval_map[k] for k in keys])
-    order        = np.argsort(unique_pvals)
-    ranks        = np.empty_like(order); ranks[order] = np.arange(1, n_tests + 1)
-    bh_adj       = np.minimum(1.0, unique_pvals * n_tests / ranks)
-    for i in range(n_tests - 2, -1, -1):
-        bh_adj[order[i]] = min(bh_adj[order[i]], bh_adj[order[i + 1]])
-    adj_map = {k: v for k, v in zip(keys, bh_adj)}
-
-    pval_index    = pd.MultiIndex.from_tuples(pval_map.keys())
-    df["p_value"] = pd.Series(list(pval_map.values()), index=pval_index).reindex(row_idx).fillna(1.0).to_numpy()
-    df["p_value_adj"] = pd.Series(list(adj_map.values()), index=pval_index).reindex(row_idx).fillna(1.0).to_numpy()
+    pair_idx = pd.MultiIndex.from_arrays([pairs["record_id"], pairs["motif_name"]])
+    df["p_value"] = pd.Series(pvals, index=pair_idx).reindex(row_idx).fillna(1.0).to_numpy()
+    df["p_value_adj"] = pd.Series(adj, index=pair_idx).reindex(row_idx).fillna(1.0).to_numpy()
     df["neg_log10_p"] = (-np.log10(df["p_value"])).round(2)
 
     def _stars(p):
@@ -1071,6 +1276,29 @@ def add_pvalues_to_hits(df: "pd.DataFrame") -> "pd.DataFrame":
         return "ns"
 
     df["significance"] = df["p_value_adj"].apply(_stars)
+
+    # motif-level enrichment against the composition-matched expectation
+    if base_counts:
+        try:
+            allc = np.array(list(base_counts.values()), dtype=float)
+            alltot = allc.sum(axis=1, keepdims=True)
+            alltot[alltot == 0] = 1.0
+            allf = allc / alltot
+            Ls = allc.sum(axis=1)
+            enrich = {}
+            obs_by_motif = df.groupby("motif_name").size().to_dict()
+            for mname in motif_names:
+                w = len(str(motif_pattern[mname]))
+                exp = float((np.maximum(0, Ls - w + 1) * _pattern_probs(motif_pattern[mname], allf)).sum())
+                obs = int(obs_by_motif.get(mname, 0))
+                enrich[mname] = {
+                    "observed": obs, "expected": exp,
+                    "fold": (obs / exp) if exp > 0 else float("inf"),
+                    "p_value": float(_poisson.sf(obs - 1, max(exp, 1e-300))),
+                }
+            df.attrs["motif_enrichment"] = enrich
+        except Exception:
+            pass
     return df
 
 
