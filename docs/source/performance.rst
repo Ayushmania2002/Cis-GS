@@ -25,15 +25,10 @@ Resources per step
      - Peak RAM
      - Note
    * - Promoter extraction
-     - Cis-GS 1.3.2.4 (indexed)
+     - Cis-GS 1.3.2.4
      - 4.9 s
      - 0.39 GB
      - includes GFF3 parse; 20.8 s on a cold first read
-   * -  
-     - Cis-GS 1.3.2.3
-     - 62.7 s
-     - 1.86 GB
-     - loaded whole chromosomes
    * -  
      - bedtools getfasta
      - 1.8 s CPU
@@ -70,15 +65,10 @@ Resources per step
      - 1.18 GB
      - 442,811 hit rows
    * - Co-expression pipeline (5,000 genes x 54 samples)
-     - Cis-GS (igraph)
+     - Cis-GS
      - 10.1 s
      - 1.67 GB
      - 2.06 M edges, 15 modules
-   * -  
-     - Cis-GS (python-louvain fallback)
-     - 29.8 s
-     - 1.78 GB
-     -  
 
 Notes
 -----
