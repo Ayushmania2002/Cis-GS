@@ -15,16 +15,22 @@ cis-gs extract
 
 .. code-block:: bash
 
-   cis-gs extract --fasta genome.fa --gff annot.gff3 \
-                  --upstream 2000 [--avoid-overlap] --out promoters.fa
+   cis-gs extract genome.fa annot.gff3 [-l BP] [-o promoters.fasta]
+
+Writes ``promoters.fasta`` and ``promoters.tsv``. ``-l/--length`` is the
+promoter length in bp (default 1000).
 
 cis-gs search
 -------------
 
 .. code-block:: bash
 
-   cis-gs search --promoters promoters.fa --motifs motifs.meme \
-                 [--allow-overlap] [--rc] --out hits.csv
+   cis-gs search promoters.fasta -m GGATT [-m MOTIF ...] [-o hits.csv]
+   cis-gs search promoters.fasta --motifs-file motifs.txt [--no-iupac] [--no-revcomp]
+
+Both strands are searched by default. After the scan the command prints the
+motif-level enrichment and the number of hits significant at BH-FDR <= 0.05
+(see :doc:`../workflow/step2_motif_search`).
 
 cis-gs batch
 ------------

@@ -19,7 +19,7 @@ pause, swap tools, and resume.
      - ``promoters.fa``
    * - 2
      - :doc:`Motif Search <step2_motif_search>`
-     - IUPAC / MEME / PlantTFDB / AnimalTFDB scanning with hypergeom p-vals
+     - IUPAC / MEME / PlantTFDB / AnimalTFDB scanning with composition-matched binomial p-values + BH-FDR
      - ``hits.csv``
    * - 3
      - :doc:`Motif Logos <step3_motif_logos>`

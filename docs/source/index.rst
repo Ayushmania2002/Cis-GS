@@ -31,6 +31,7 @@ Quick links
 
    installation
    quickstart
+   performance
 
 .. toctree::
    :maxdepth: 2

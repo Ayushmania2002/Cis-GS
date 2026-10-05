@@ -2,7 +2,7 @@ Step 2 — Motif Search
 =====================
 
 Scans every promoter for transcription-factor binding motifs and
-computes a hypergeometric over-representation p-value per motif.
+tests every gene-motif pair against a composition-matched null model.
 
 Inputs
 ------
@@ -18,34 +18,50 @@ Inputs
 Statistics
 ----------
 
-For each motif:
+*Per promoter and motif strand* (the ``p_value`` column): the probability of
+seeing at least :math:`k` matches of the motif in a promoter of length
+:math:`L`, under a binomial model
 
 .. math::
 
-   p = P(X \geq k) \;\text{where}\; X \sim \text{Hypergeom}(N, K, n)
+   p = P(X \geq k), \qquad X \sim \text{Binomial}(L - w + 1,\; q)
 
-with
+where :math:`w` is the motif length and :math:`q` is the probability that a
+random sequence matches the (IUPAC) motif at one position, computed from **that
+promoter's own base composition**. A GC-rich motif is therefore expected more
+often in GC-rich promoters, which prevents spurious calls.
 
-.. list-table::
-   :widths: 20 80
+*Multiple testing* (``p_value_adj``): Benjamini-Hochberg over **all promoters x
+motif strands scanned**, not only over the pairs that happen to contain a hit.
+Individual occurrences of a short or degenerate motif are therefore rarely
+significant on their own; that is expected.
 
-   * - :math:`N`
-     - Total number of promoters
-   * - :math:`K`
-     - Number of promoters in which the motif occurs at least once
-   * - :math:`n`
-     - Number of *query* promoters (e.g. a K-means cluster from Step 6)
-   * - :math:`k`
-     - Number of *query* promoters with a hit
+*Motif-level enrichment*: ``cis-gs search`` also prints, for every motif
+strand, the observed number of hits, the number expected under the same null,
+the fold enrichment and a one-sided Poisson P-value. This is the appropriate
+test for "is this motif enriched in these promoters at all?". In Python it is
+available as ``df.attrs["motif_enrichment"]``.
 
-Multiple-testing correction: Benjamini-Hochberg (``cis_gs.enrichment.core.bh_fdr``).
+.. note::
+
+   Versions up to 1.3.2.3 estimated the background GC from the hit sequences
+   and corrected only over the pairs with hits, which flagged nearly every
+   hit as significant. Significance columns from those versions should not be
+   compared with 1.3.2.4 and later.
 
 Outputs
 -------
 
-* ``hits.csv`` — one row per gene × motif, with hit position, strand, raw and
-  adjusted p-value.
-* **Significance Summary** — collapsed table with one row per (gene × motif).
+* ``hits.csv`` — one row per hit with position, strand, matched sequence,
+  ``p_value``, ``p_value_adj``, ``neg_log10_p`` and ``significance``.
+* **Significance Summary** — collapsed table with one row per (gene x motif).
+
+CLI equivalent
+--------------
+
+.. code-block:: bash
+
+   cis-gs search promoters.fasta --motifs-file motifs.txt -o hits.csv
 
 Gene-ID Resolution
 ------------------

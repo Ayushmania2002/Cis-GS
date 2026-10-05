@@ -45,9 +45,9 @@ Cis-GS automates the full **promoter &rarr; motif &rarr; expression &rarr; funct
 plant- and animal-genomics labs run by hand today:
 
 1. **Fetch** a reference genome + annotation directly from NCBI (live Assembly search).
-2. **Extract** promoter sequences (configurable length, strand-aware, intergenic-clipped) from any GFF3.
+2. **Extract** promoter sequences (configurable length, strand-aware, indexed so multi-Gb genomes extract in seconds) from any GFF3.
 3. **Scan** those promoters for transcription-factor binding motifs imported from PlantTFDB, AnimalTFDB, JASPAR 2024, or HOCOMOCO v11 — or any user-supplied IUPAC consensus.
-4. **Render** publication-ready sequence logos and per-gene hit tables with hypergeometric p-values and BH-FDR.
+4. **Render** publication-ready sequence logos and per-gene hit tables with composition-matched p-values, BH-FDR and motif-level enrichment.
 5. **Couple** the hits to your expression table (RNA-seq, microarray, qPCR) to flag motifs whose presence tracks expression direction.
 6. **Build** a co-expression network (Pearson / Spearman / WGCNA-style soft-thresholding), detect modules via Louvain or hierarchical clustering, and visualise eigengenes.
 7. **Enrich** the top module / cluster against KEGG (live REST queries, 11 700+ organisms) with one-sided hypergeometric ORA + Benjamini-Hochberg FDR.
@@ -148,7 +148,7 @@ Every command supports `-i / --interactive` if you want to be walked through it.
 | Step | What it does | Output |
 |---|---|---|
 | **1. Promoters** | Strand-aware promoter extraction from any FASTA + GFF3 | `promoters.fa` |
-| **2. Motif Search** | IUPAC / MEME / PlantTFDB / AnimalTFDB scanning with hypergeometric p-values + BH-FDR | `hits.csv`, significance summary |
+| **2. Motif Search** | IUPAC / MEME / PlantTFDB / AnimalTFDB scanning with composition-matched p-values + BH-FDR | `hits.csv`, significance summary |
 | **3. Motif Logos** | logomaker sequence logos with information-content shading | per-motif SVG / PNG |
 | **4. Expression Feeding** | Joins hits with an expression CSV via three Gene-ID-Mapping methods (LOC swap, mapping CSV, GFF3 Dbxref expansion) | `expression_matched.csv` |
 | **5. Coexpression** | Pearson / Spearman / WGCNA-style soft-thresholding, Louvain / hierarchical module detection | `network.gexf`, eigengene plot |

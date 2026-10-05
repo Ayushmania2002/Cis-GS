@@ -12,7 +12,7 @@ GUI in 5 clicks
 
 1. **Step 1 — Promoters**: drop a FASTA + GFF3, set promoter length, click *Extract*.
 2. **Step 2 — Motif Search**: click *Import from PlantTFDB*, pick your species, tick motifs, *Import Selected → Step 2*.
-3. **Step 2 (still)**: click *Scan* — hits CSV with hypergeometric p-values appears.
+3. **Step 2 (still)**: click *Scan* — hits CSV with composition-matched p-values and BH-FDR appears.
 4. **Step 7 — KEGG Enrichment**: select a KEGG organism from the live dropdown, paste your gene list, *Run*.
 5. Done — CSVs and SVGs land in ``~/CisGS-Workspace/``.
 
