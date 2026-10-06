@@ -26,41 +26,42 @@ C_HDR_FEAT  = "#3D4D5C"   # feature col header
 C_CAT_BG    = "#D5D8DC"   # category divider
 C_CISG_CELL = "#EAF4FF"   # light blue tint - Cis-GS No cells
 
-YES, NO, PARTIAL = 1, 0, 0.5
+YES, NO, PARTIAL, UNK = 1, 0, 0.5, -1   # UNK = not verified against source
 
 # ── Tools ──────────────────────────────────────────────────────────────────
 tools = [
     "PlantCARE", "PLACE", "FIMO\n(MEME Suite)",
     "JASPAR\nScan", "Homer", "CiiiDER",
-    "Cis-GS\n(v1.3.0)",
+    "PlantPAN\n4.0", "PlantRegMap",
+    "Cis-GS\n(v1.3.2.5)",
 ]
 CISG = len(tools) - 1
 
 # ── Feature categories and data ────────────────────────────────────────────
-# values: [PlantCARE, PLACE, FIMO, JASPAR, Homer, CiiiDER, Cis-GS]
+# values: [PlantCARE, PLACE, FIMO, JASPAR, Homer, CiiiDER, PlantPAN4, PlantRegMap, Cis-GS]
 categories = [
     ("Input & Scope", [
-        ("Genome-wide analysis",           [NO,      NO,      YES,     PARTIAL, YES,     PARTIAL, YES]),
-        ("Automated promoter extraction",  [NO,      NO,      NO,      NO,      PARTIAL, NO,      YES]),
-        ("Non-model organism support",     [NO,      NO,      YES,     YES,     YES,     YES,     YES]),
-        ("Custom motif input",             [NO,      NO,      YES,     PARTIAL, YES,     YES,     YES]),
+        ("Genome-wide analysis",           [NO, NO, YES, PARTIAL, YES, PARTIAL, PARTIAL, PARTIAL, YES]),
+        ("Automated promoter extraction",  [NO, NO, NO, NO, PARTIAL, NO, PARTIAL, PARTIAL, YES]),
+        ("Non-model organism support",     [NO, NO, YES, YES, YES, YES, PARTIAL, PARTIAL, YES]),
+        ("Custom motif input",             [NO, NO, YES, PARTIAL, YES, YES, NO, NO, YES]),
     ]),
     ("Motif Analysis", [
-        ("IUPAC degeneracy support",       [PARTIAL, PARTIAL, YES,     YES,     PARTIAL, YES,     YES]),
-        ("Statistical scoring (p-values)", [NO,      NO,      YES,     YES,     YES,     YES,     YES]),
-        ("PWM / PSSM scoring",             [NO,      NO,      YES,     YES,     YES,     YES,     NO ]),
-        ("Consensus pattern matching",     [YES,     YES,     PARTIAL, NO,      NO,      NO,      YES]),
+        ("IUPAC degeneracy support",       [PARTIAL, PARTIAL, YES, YES, PARTIAL, YES, NO, NO, YES]),
+        ("Statistical scoring (p-values)", [NO, NO, YES, YES, YES, YES, NO, YES, YES]),
+        ("PWM / PSSM scoring",             [NO, NO, YES, YES, YES, YES, YES, YES, NO]),
+        ("Consensus pattern matching",     [YES, YES, PARTIAL, NO, NO, NO, NO, NO, YES]),
     ]),
     ("Downstream Biology", [
-        ("Co-expression analysis",         [NO,      NO,      NO,      NO,      NO,      NO,      YES]),
-        ("KEGG pathway enrichment",        [NO,      NO,      NO,      NO,      NO,      NO,      YES]),
-        ("Graph clustering (Louvain)",     [NO,      NO,      NO,      NO,      NO,      NO,      YES]),
-        ("Expression data integration",    [NO,      NO,      NO,      NO,      NO,      NO,      YES]),
+        ("Co-expression analysis",         [NO, NO, NO, NO, NO, NO, PARTIAL, NO, YES]),
+        ("KEGG pathway enrichment",        [NO, NO, NO, NO, NO, NO, NO, NO, YES]),
+        ("Graph clustering (Louvain)",     [NO, NO, NO, NO, NO, NO, NO, NO, YES]),
+        ("Expression data integration",    [NO, NO, NO, NO, NO, NO, PARTIAL, NO, YES]),
     ]),
     ("Usability", [
-        ("Local execution (no limits)",    [NO,      NO,      YES,     NO,      YES,     YES,     YES]),
-        ("Whole-genome batch processing",  [NO,      NO,      YES,     PARTIAL, YES,     PARTIAL, YES]),
-        ("Multi-species in one run",       [NO,      NO,      NO,      NO,      NO,      NO,      YES]),
+        ("Local execution (no limits)",    [NO, NO, YES, NO, YES, YES, NO, NO, YES]),
+        ("Whole-genome batch processing",  [NO, NO, YES, PARTIAL, YES, PARTIAL, PARTIAL, PARTIAL, YES]),
+        ("Multi-species in one run",       [NO, NO, NO, NO, NO, NO, NO, NO, YES]),
     ]),
 ]
 
@@ -73,18 +74,18 @@ n_rows = len(all_rows)   # 15
 n_tools = len(tools)     # 7
 
 # ── Font sizes ─────────────────────────────────────────────────────────────
-FS_TITLE    = 26     # figure title
-FS_SUBTITLE = 18     # subtitle / caption line
-FS_COL_HDR  = 21     # "Feature / Capability" header
+FS_TITLE    = 30     # figure title
+FS_SUBTITLE = 22     # subtitle / caption line
+FS_COL_HDR  = 25     # "Feature / Capability" header
 FS_TOOL_HDR = 19     # tool name headers
-FS_CAT      = 19     # category divider label
-FS_FEAT     = 19     # feature row labels
-FS_VAL      = 19     # Yes / No / Partial cell text
-FS_LEGEND   = 19     # legend labels
+FS_CAT      = 23     # category divider label
+FS_FEAT     = 22     # feature row labels
+FS_VAL      = 23     # Yes / No / Partial cell text
+FS_LEGEND   = 23     # legend labels
 
 # ── Layout constants (data units) ─────────────────────────────────────────
-FEAT_W  = 6.8    # feature column width
-TOOL_W  = 3.00   # each tool column width
+FEAT_W  = 8.8    # feature column width
+TOOL_W  = 2.75   # each tool column width
 ROW_H   = 1.30   # data row height
 HDR_H   = 1.80   # tool header height
 CAT_H   = 0.78   # category divider height
@@ -105,7 +106,7 @@ ax.axis("off")
 fig.patch.set_facecolor("white")
 
 # ── Helper: draw one rectangle ─────────────────────────────────────────────
-def cell(x, y, w, h, fc, ec="#CCCCCC", lw=0.6, zorder=1):
+def cell(x, y, w, h, fc, ec="#000000", lw=1.0, zorder=1):
     ax.add_patch(mpatches.FancyBboxPatch(
         (x, y), w, h,
         boxstyle="square,pad=0",
@@ -126,13 +127,15 @@ def val_cell(x, y, val, is_cisg=False):
     elif val == PARTIAL:
         bg = C_PARTIAL
         tc, sym, fw = "#000000", "Partial", "normal"
+    elif val == UNK:
+        bg, tc, sym, fw = "#F4D6B0", "#7A4B00", "n.v.", "normal"
     else:
         bg = C_CISG_CELL if is_cisg else C_NO
         tc, sym, fw = "#555555", "No", "normal"
     cell(x, y, TOOL_W, ROW_H,
          fc=bg,
-         ec="#0072B2" if is_cisg else "#CCCCCC",
-         lw=1.0 if is_cisg else 0.4)
+         ec="#000000",
+         lw=1.0)
     label(x, y, TOOL_W, ROW_H, sym, FS_VAL, tc, fw)
 
 # ── Title ──────────────────────────────────────────────────────────────────
@@ -142,7 +145,7 @@ ax.text(total_w / 2, ty + 0.35,
         ha="center", va="center", fontsize=FS_TITLE, fontweight="bold",
         color="#000000", fontfamily=FONT)
 ax.text(total_w / 2, ty - 0.30,
-        "Cis-GS v1.3.0 integrates genome-wide promoter extraction, motif scanning, "
+        "Cis-GS v1.3.2.5 integrates genome-wide promoter extraction, motif scanning, "
         "co-expression clustering, and KEGG enrichment in a single automated pipeline",
         ha="center", va="center", fontsize=FS_SUBTITLE, color="#000000",
         fontfamily=FONT, style="italic")
@@ -151,7 +154,7 @@ ax.text(total_w / 2, ty - 0.30,
 hdr_y = total_h - PAD_TOP - HDR_H
 
 # Feature column header
-cell(0, hdr_y, FEAT_W, HDR_H, fc=C_HDR_FEAT, ec="white", lw=1.5)
+cell(0, hdr_y, FEAT_W, HDR_H, fc=C_HDR_FEAT, ec="#000000", lw=2.0)
 label(0, hdr_y, FEAT_W, HDR_H, "Feature / Capability",
       FS_COL_HDR, "white", "bold", ha="center")
 
@@ -160,7 +163,7 @@ for i, tool in enumerate(tools):
     x = FEAT_W + i * TOOL_W
     is_cisg = (i == CISG)
     bg = C_CISG_HDR if is_cisg else C_HDR_TOOLS
-    cell(x, hdr_y, TOOL_W, HDR_H, fc=bg, ec="white", lw=1.5)
+    cell(x, hdr_y, TOOL_W, HDR_H, fc=bg, ec="#000000", lw=2.0)
     label(x, hdr_y, TOOL_W, HDR_H, tool, FS_TOOL_HDR,
           "white", "bold" if is_cisg else "normal")
 
@@ -171,7 +174,7 @@ row_idx = 0
 for cat_name, rows in categories:
     # Category divider
     y_cur -= CAT_H
-    cell(0, y_cur, total_w, CAT_H, fc=C_CAT_BG, ec="white", lw=0.5)
+    cell(0, y_cur, total_w, CAT_H, fc=C_CAT_BG, ec="#000000", lw=1.0)
     label(0, y_cur, total_w, CAT_H, cat_name,
           FS_CAT, "#000000", "bold", style="italic")
 
@@ -180,7 +183,7 @@ for cat_name, rows in categories:
         row_bg = "#FAFAFA" if row_idx % 2 == 0 else "#FFFFFF"
 
         # Feature cell
-        cell(0, y_cur, FEAT_W, ROW_H, fc=row_bg, ec="#DDDDDD", lw=0.4)
+        cell(0, y_cur, FEAT_W, ROW_H, fc=row_bg, ec="#000000", lw=1.0)
         ax.text(FEAT_W - 0.22, y_cur + ROW_H / 2, feat,
                 ha="right", va="center", fontsize=FS_FEAT,
                 color="#000000", fontfamily=FONT)
