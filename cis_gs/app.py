@@ -1034,7 +1034,7 @@ def extract_promoters(genome_fasta, gff3, out_fasta, out_table,
                     if p_start > seqlen:
                         continue
                     # reverse complement via str ops (avoids Seq object overhead)
-                    _comp = str.maketrans("ACGTN", "TGCAN")
+                    _comp = str.maketrans("ACGTRYKMBDHVN", "TGCAYRMKVHDBN")   # full IUPAC complement
                     prom = genome_index.fetch(fasta_key, p_start - 1, p_end).translate(_comp)[::-1]
                 header = (f"{g.gene_id}|{g.gene_name}|"
                           f"{fasta_key}:{p_start}-{p_end}({g.strand})")

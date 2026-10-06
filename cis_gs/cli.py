@@ -1967,6 +1967,12 @@ def _maybe_suggest_typo(argv):
 
 
 def main():
+    # Never crash on a character the console code page cannot print (e.g. cp1252 on Windows).
+    for _stream in (sys.stdout, sys.stderr):
+        try:
+            _stream.reconfigure(errors="replace")
+        except Exception:
+            pass
     _print_banner()
 
     # ---- did-you-mean preflight on top-level command ---------------------

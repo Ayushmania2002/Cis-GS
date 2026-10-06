@@ -1,6 +1,24 @@
 Changelog
 =========
 
+v1.3.2.5 — 2026-10
+------------------
+
+**Fixes**
+
+* ``cis-gs extract`` and ``cis-gs batch`` now reverse-complement minus-strand
+  promoters with the full IUPAC complement table. Previously only A, C, G, T
+  and N were complemented and any other ambiguity code (R, Y, K, M, B, D, H,
+  V) was left unchanged. The effect is limited to promoters that contain
+  ambiguity codes (1 of 33,623 promoters in the rice IRGSP-1.0 RefSeq genome);
+  all other promoters were already identical to bedtools and seqkit output.
+  The GUI was not affected.
+* ``cis-gs --help`` no longer crashes on consoles that use the Windows cp1252 code
+  page (a non-ASCII arrow in one help string); the CLI now substitutes any
+  character the console cannot print.
+
+----
+
 v1.3.2.4 — 2026-10
 ------------------
 

@@ -144,7 +144,7 @@ def register(sub: argparse._SubParsersAction) -> None:
     # id-convert --------------------------------------------------------------
     p = sub.add_parser(
         "id-convert",
-        help="Auto-detect & translate gene IDs (symbol ↔ Ensembl ↔ Entrez ↔ TAIR)",
+        help="Auto-detect & translate gene IDs (symbol <-> Ensembl <-> Entrez <-> TAIR)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=(
             "Translate a heterogeneous gene-ID list to a canonical\n"
