@@ -42,8 +42,8 @@ Performance
 -----------
 
 *Arachis hypogaea* Tifrunner (2.6 Gb, 106,608 genes, 2 kb promoters):
-about 5 s and 0.4 GB of memory with a warm file cache (20 s on a first,
-cold read), with output identical to bedtools ``getfasta``. See
+4.7 s and 0.4 GiB of memory with a pre-built ``.fai`` index (6.5 s and
+0.6 GiB when Cis-GS has to build the index itself), with output identical to bedtools ``getfasta``. See
 :doc:`../performance` for the full comparison.
 
 CLI equivalent
