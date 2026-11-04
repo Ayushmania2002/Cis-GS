@@ -95,6 +95,8 @@ Notes
   Cis-GS additionally parses the GFF3 and writes the promoter table used by
   later steps. The wall time of the reference tools varied between repetitions
   (file-system latency under WSL2) while their CPU time did not.
+* **CPU time versus wall time:** the CPU time of Cis-GS is higher than its wall time because it uses more than one core on average (1.7); loading the Cis-GS
+  modules alone takes about 1.3 s of wall time and 4.3 s of CPU time while the program and its libraries are loaded.
 * **Cores:** extraction and motif scanning used 1.3-1.7 cores on average (CPU time divided by wall
   time). The co-expression step used about 5.5 cores inside NumPy / scikit-learn.
   A multiprocessing prototype of the scan reached 4.3x with 16 workers; it is

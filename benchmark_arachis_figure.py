@@ -30,24 +30,31 @@ C_CIS, C_CIS2, C_OTH, C_OLD = "#0072B2", "#56A0D3", "#8c8c8c", "#D55E00"
 
 fig, axs = plt.subplots(2, 2, figsize=(14, 10.5))
 
-# ---- A: promoter extraction (CPU time; reference tools also need a BED file) ----
+# ---- A: promoter extraction (wall time and CPU time; reference tools also need a BED file) ----
 ax = axs[0, 0]
-bed = res["bed generation (awk)"]["wall_mean"]
-items = [("Cis-GS\n(index present)", res["Cis-GS extract"], 0, C_CIS),
-         ("Cis-GS\n(builds index)", res["Cis-GS extract (no .fai, index built in memory)"], 0, C_CIS2),
-         ("bedtools\ngetfasta", res["bedtools getfasta"], bed, C_OTH),
-         ("seqkit\nsubseq", res["seqkit subseq"], bed, C_OTH),
-         ("pyfaidx\nloop", res["pyfaidx loop"], bed, C_OTH)]
-vals = [r["cpu_mean"] + extra for _, r, extra, _ in items]
-ax.bar(range(len(items)), vals, color=[c for *_, c in items])
-for i, (_, r, extra, _) in enumerate(items):
-    ax.text(i, vals[i] * 1.12, f"{vals[i]:.1f} s CPU\n{r['peak_mib']:.0f} MiB peak", ha="center", va="bottom", fontsize=10.5)
-ax.set_yscale("log"); ax.set_ylim(0.5, 400)
-ax.set_xticks(range(len(items))); ax.set_xticklabels([n for n, *_ in items], fontsize=10.5)
-ax.set_ylabel("CPU time (s, log scale)")
+bed_wall, bed_cpu = res["bed generation (awk)"]["wall_mean"], res["bed generation (awk)"]["cpu_mean"]
+items = [("Cis-GS\n(index present)", res["Cis-GS extract"], False, C_CIS, "#9CC9E6"),
+         ("Cis-GS\n(builds index)", res["Cis-GS extract (no .fai, index built in memory)"], False, C_CIS2, "#CFE3F2"),
+         ("bedtools\ngetfasta", res["bedtools getfasta"], True, "#6b6b6b", "#c4c4c4"),
+         ("seqkit\nsubseq", res["seqkit subseq"], True, "#6b6b6b", "#c4c4c4"),
+         ("pyfaidx\nloop", res["pyfaidx loop"], True, "#6b6b6b", "#c4c4c4")]
+wd = 0.38
+for i, (name, r, add_bed, c_wall, c_cpu) in enumerate(items):
+    wall = r["wall_mean"] + (bed_wall if add_bed else 0); cpu = r["cpu_mean"] + (bed_cpu if add_bed else 0)
+    ax.bar(i - wd / 2, wall, wd, yerr=r["wall_sd"], color=c_wall, capsize=3, error_kw={"lw": 1})
+    ax.bar(i + wd / 2, cpu, wd, yerr=r["cpu_sd"], color=c_cpu, hatch="///", edgecolor="#555", linewidth=0.6, capsize=3, error_kw={"lw": 1})
+    ax.text(i - wd / 2, (wall + r["wall_sd"]) * 1.12, f"{wall:.1f}", ha="center", va="bottom", fontsize=10)
+    ax.text(i + wd / 2, (cpu + r["cpu_sd"]) * 1.12, f"{cpu:.1f}", ha="center", va="bottom", fontsize=10)
+ax.set_yscale("log"); ax.set_ylim(0.5, 60)
+ax.set_xticks(range(len(items)))
+ax.set_xticklabels([f"{n}\n{r['peak_mib']:.0f} MiB" for n, r, *_ in items], fontsize=10)
+ax.set_ylabel("Time (s, log scale)")
 ax.set_title("A  Promoter extraction (106,608 genes, 2 kb)", loc="left", fontweight="bold")
-ax.text(0.99, 0.96, "bedtools, seqkit, pyfaidx: + 1.4 s to make a BED file", transform=ax.transAxes,
-        ha="right", va="top", fontsize=9.5, color="#555")
+from matplotlib.patches import Patch
+ax.legend(handles=[Patch(facecolor="#6b6b6b", label="Wall time"), Patch(facecolor="#c4c4c4", hatch="///", edgecolor="#555", label="CPU time")],
+          frameon=False, fontsize=10, loc="upper right")
+ax.text(0.99, 0.80, "bedtools, seqkit, pyfaidx: + 1.4 s to make a BED file\nPeak memory (MiB) under each tool name", transform=ax.transAxes,
+        ha="right", va="top", fontsize=9, color="#555")
 
 # ---- B: motif scan (wall time) ----
 ax = axs[0, 1]
